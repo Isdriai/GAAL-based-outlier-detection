@@ -49,7 +49,7 @@ def load_data():
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
     y = data.pop(1)
-    data_x = data.as_matrix()
+    data_x = data.values
     data_id = id.values
     data_y = y.values
     return data_x, data_y, data_id

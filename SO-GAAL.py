@@ -46,7 +46,7 @@ def create_discriminator():
 # Load data
 def load_data():
     data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
-    print(data[:10,:])
+    print(data.iloc[:10,:])
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
     y = data.pop(1)

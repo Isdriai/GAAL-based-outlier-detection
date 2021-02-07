@@ -166,8 +166,10 @@ if __name__ == '__main__':
             o_size = len(outlier_parray)
             i_size = len(inlier_parray)
             for o in outlier_parray:
+                print("o")
                 print(str(o) + "/" + str(o_size))
                 for i in inlier_parray:
+                    print("i")
                     print(str(i) + "/" + str(i_size))
                     if o < i:
                         sum += 1.0

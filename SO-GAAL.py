@@ -158,10 +158,17 @@ if __name__ == '__main__':
             print("deb auc")
             # Calculate the AUC
             inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
+            print("inlier")
             outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
+            print("outlier")
             sum = 0.0
+            print("boucle")
+            o_size = len(outlier_parray)
+            i_size = len(inlier_parray)
             for o in outlier_parray:
+                print(str(o) + "/" + str(o_size))
                 for i in inlier_parray:
+                    print(str(i) + "/" + str(i_size))
                     if o < i:
                         sum += 1.0
                     elif o == i:
@@ -170,6 +177,7 @@ if __name__ == '__main__':
                         sum += 0
             AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
             print('AUC:{}'.format(AUC))
+            print("deuxieme boucle")
             for i in range(num_batches):
                 train_history['auc'].append(AUC)
             print("fin auc")

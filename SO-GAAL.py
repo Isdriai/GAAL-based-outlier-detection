@@ -140,18 +140,22 @@ if __name__ == '__main__':
                     generator_loss = combine_model.evaluate(noise, trick)
                     train_history['generator_loss'].append(generator_loss)
 
+            print("fin index")
             # Stop training generator
             if epoch + 1 > args.stop_epochs:
                 stop = 1
 
             # Detection result
+            print("deb detect")
             p_value = discriminator.predict(data_x)
             p_value = pd.DataFrame(p_value)
             data_y = pd.DataFrame(data_y)
             result = np.concatenate((p_value,data_y), axis=1)
             result = pd.DataFrame(result, columns=['p', 'y'])
             result = result.sort_values('p', ascending=True)
+            print("fin detect")
 
+            print("deb auc")
             # Calculate the AUC
             inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
             outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
@@ -168,5 +172,6 @@ if __name__ == '__main__':
             print('AUC:{}'.format(AUC))
             for i in range(num_batches):
                 train_history['auc'].append(AUC)
+            print("fin auc")
 
         plot(train_history, 'loss')

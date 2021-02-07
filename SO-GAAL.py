@@ -172,6 +172,7 @@ if __name__ == '__main__':
                 i_index = 0
                 for i in inlier_parray:
                     print("i")
+                    print(str(o_index) + "/" + str(o_size)
                     print(str(i_index) + "/" + str(i_size))
                     if o < i:
                         sum += 1.0

@@ -46,12 +46,21 @@ def create_discriminator():
 # Load data
 def load_data():
     data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
-    print(data.iloc[:10,:])
     data = data.sample(frac=1).reset_index(drop=True)
+    print("data")
+    print(data)
     id = data.pop(0)
+    print("id")
+    print(id)
     y = data.pop(1)
+    print("y")
+    print(y)
     data_x = data.values
+    print("data_x")
+    print(data_x)
     data_id = id.values
+    print("data_id")
+    print(data_id)
     data_y = y.values
     return data_x, data_y, data_id
 
@@ -71,8 +80,9 @@ if __name__ == '__main__':
     train = True
     args = parse_args()
     data_x, data_y, data_id = load_data()
+    print("coucou")
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
-
+    print("fin coucou")
     if train:
         latent_size = data_x.shape[1]
         data_size = data_x.shape[0]

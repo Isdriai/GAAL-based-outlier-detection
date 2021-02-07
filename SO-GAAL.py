@@ -181,7 +181,7 @@ if __name__ == '__main__':
                     else:
                         sum += 0
                     i_index += 1
-            o_index += 1
+                o_index += 1
             AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
             print('AUC:{}'.format(AUC))
             print("deuxieme boucle")

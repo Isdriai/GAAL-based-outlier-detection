@@ -165,18 +165,22 @@ if __name__ == '__main__':
             print("boucle")
             o_size = len(outlier_parray)
             i_size = len(inlier_parray)
+            o_index = 0
             for o in outlier_parray:
                 print("o")
-                print(str(o) + "/" + str(o_size))
+                print(str(o_index) + "/" + str(o_size))
+                i_index = 0
                 for i in inlier_parray:
                     print("i")
-                    print(str(i) + "/" + str(i_size))
+                    print(str(i_index) + "/" + str(i_size))
                     if o < i:
                         sum += 1.0
                     elif o == i:
                         sum += 0.5
                     else:
                         sum += 0
+                    i_index += 1
+            o_index += 1
             AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
             print('AUC:{}'.format(AUC))
             print("deuxieme boucle")

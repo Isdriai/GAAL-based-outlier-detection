@@ -75,17 +75,12 @@ def count_occ_eq_and_inf(value, tab, start_index):
                 index_first_occ = i
             nbr_occ += 1
         elif tab[i] > value:
-            print("i")
-            print(i)
-            return index_first_occ if index_first_occ != None else i, nbr_occ, i-1
+            index_first_occ = index_first_occ if index_first_occ != None else i
+            return index_first_occ, nbr_occ, index_first_occ
     # si on croise pas de > donc quand tout le tab est < et/ou ==
     if index_first_occ == None:
-        print("coucou 2 ")
-        print(len(tab))
         return len(tab), 0, len(tab)
     else:
-        print("coucou")
-        print(len(tab) - nbr_occ)
         return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
 
@@ -173,8 +168,6 @@ if __name__ == '__main__':
                 start_index = 0
                 for i in inlier_parray:
                     nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-                    print("nbr inf")
-                    print(nbr_inf)
                     start_index = st_i
                     sum += nbr_inf
                     sum += (nbr_eq * 0.5)

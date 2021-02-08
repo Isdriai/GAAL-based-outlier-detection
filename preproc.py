@@ -1,5 +1,9 @@
 # Pour reprendre le format des données qu'attend GAAL, il faut ajouter un id, traiter les données catégoriques 
 import pandas as pd
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 def to_one_hot(features, data):
     data_copy = data.copy()
@@ -38,4 +42,13 @@ move_column("class", 1, data)
 
 print(data)
 
-data.to_csv(path + "kddproc", header=False, index=False)
+#data.to_csv(path + "kddproc", header=False, index=False)
+
+pca = PCA(n_components=122)
+pca.fit_transform(StandardScaler().fit_transform(data.iloc[:,2:]))
+
+print(np.cumsum(pca.explained_variance_ratio_))
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlabel('Number of components')
+plt.ylabel('Cumulative explained variance')
+plt.show()

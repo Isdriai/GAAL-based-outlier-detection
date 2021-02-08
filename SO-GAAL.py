@@ -47,20 +47,10 @@ def create_discriminator():
 def load_data():
     data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
-    print("data")
-    print(data)
     id = data.pop(0)
-    print("id")
-    print(id)
     y = data.pop(1)
-    print("y")
-    print(y)
     data_x = data.values
-    print("data_x")
-    print(data_x)
     data_id = id.values
-    print("data_id")
-    print(data_id)
     data_y = y.values
     return data_x, data_y, data_id
 
@@ -80,9 +70,7 @@ if __name__ == '__main__':
     train = True
     args = parse_args()
     data_x, data_y, data_id = load_data()
-    print("coucou")
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
-    print("fin coucou")
     if train:
         latent_size = data_x.shape[1]
         data_size = data_x.shape[0]
@@ -140,53 +128,54 @@ if __name__ == '__main__':
                     generator_loss = combine_model.evaluate(noise, trick)
                     train_history['generator_loss'].append(generator_loss)
 
-            print("fin index")
             # Stop training generator
             if epoch + 1 > args.stop_epochs:
                 stop = 1
 
-            # Detection result
-            print("deb detect")
-            p_value = discriminator.predict(data_x)
-            p_value = pd.DataFrame(p_value)
-            data_y = pd.DataFrame(data_y)
-            result = np.concatenate((p_value,data_y), axis=1)
-            result = pd.DataFrame(result, columns=['p', 'y'])
-            result = result.sort_values('p', ascending=True)
-            print("fin detect")
-
-            print("deb auc")
-            # Calculate the AUC
-            inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
-            print("inlier")
-            outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
-            print("outlier")
-            sum = 0.0
-            print("boucle")
-            o_size = len(outlier_parray)
-            i_size = len(inlier_parray)
-            o_index = 0
-            for o in outlier_parray:
-                print("o")
-                print(str(o_index) + "/" + str(o_size))
-                i_index = 0
-                for i in inlier_parray:
-                    print("i")
+            if epoch % 10 == 0:
+                # Detection result
+                print("deb detect")
+                p_value = discriminator.predict(data_x)
+                p_value = pd.DataFrame(p_value)
+                data_y = pd.DataFrame(data_y)
+                result = np.concatenate((p_value,data_y), axis=1)
+                result = result.sample(frac=0.1, replace=True, random_state=1)
+                result = pd.DataFrame(result, columns=['p', 'y'])
+                result = result.sort_values('p', ascending=True)
+                print("fin detect")
+    
+                print("deb auc")
+                # Calculate the AUC
+                inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
+                print("inlier")
+                outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
+                print("outlier")
+                sum = 0.0
+                print("boucle")
+                o_size = len(outlier_parray)
+                i_size = len(inlier_parray)
+                o_index = 0
+                for o in outlier_parray:
+                    print("o")
                     print(str(o_index) + "/" + str(o_size))
-                    print(str(i_index) + "/" + str(i_size))
-                    if o < i:
-                        sum += 1.0
-                    elif o == i:
-                        sum += 0.5
-                    else:
-                        sum += 0
-                    i_index += 1
-                o_index += 1
-            AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
-            print('AUC:{}'.format(AUC))
-            print("deuxieme boucle")
-            for i in range(num_batches):
-                train_history['auc'].append(AUC)
-            print("fin auc")
+                    i_index = 0
+                    for i in inlier_parray:
+                        print("i")
+                        print(str(o_index) + "/" + str(o_size))
+                        print(str(i_index) + "/" + str(i_size))
+                        if o < i:
+                            sum += 1.0
+                        elif o == i:
+                            sum += 0.5
+                        else:
+                            sum += 0
+                        i_index += 1
+                    o_index += 1
+                AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
+                print('AUC:{}'.format(AUC))
+                print("deuxieme boucle")
+                for i in range(num_batches):
+                    train_history['auc'].append(AUC)
+                print("fin auc")
 
         plot(train_history, 'loss')

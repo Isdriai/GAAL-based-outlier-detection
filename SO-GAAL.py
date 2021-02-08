@@ -140,7 +140,11 @@ if __name__ == '__main__':
                 p_value = pd.DataFrame(p_value)
                 data_y = pd.DataFrame(data_y)
                 result = np.concatenate((p_value,data_y), axis=1)
+                print("result np")
+                print(result[:10,:])
                 result = pd.DataFrame(result, columns=['p', 'y'])
+                print("result df")
+                print(result.iloc[:10,:])
                 result = result.sort_values('p', ascending=True)
                 print("fin detect")
     

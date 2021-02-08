@@ -74,7 +74,7 @@ def count_occ_eq_and_inf(value, tab, start_index):
             if index_first_occ == None:
                 index_first_occ = i
             nbr_occ += 1
-        else if tab[i] > value:
+        elif tab[i] > value:
             return index_first_occ if index_first_occ != None else i-1, nbr_occ, i
     if tab[start_index] > value:
         return 0, nbr_occ, start_index

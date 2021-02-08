@@ -139,11 +139,11 @@ if __name__ == '__main__':
                 p_value = pd.DataFrame(p_value)
                 data_y = pd.DataFrame(data_y)
                 result = np.concatenate((p_value,data_y), axis=1)
-                result = result.sample(frac=0.1, replace=True, random_state=1)
+                result = np.random.choice(result, int(len(result)/10), replace=True)
                 result = pd.DataFrame(result, columns=['p', 'y'])
                 result = result.sort_values('p', ascending=True)
                 print("fin detect")
-    
+
                 print("deb auc")
                 # Calculate the AUC
                 inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values

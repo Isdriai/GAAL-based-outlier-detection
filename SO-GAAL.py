@@ -3,7 +3,6 @@ from keras.models import Sequential, Model
 from keras.optimizers import SGD
 import numpy as np
 import pandas as pd
-from scipy.sparse import csr_matrix
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import keras
@@ -66,6 +65,10 @@ def plot(train_history, name):
     ax.plot(x, gy,color='red')
     ax.plot(x, aucy, color='yellow', linewidth = '3')
     plt.show()
+
+def count_occ_eq_and_inf(value, tab, start_index):
+    return None
+
 
 if __name__ == '__main__':
     train = True
@@ -140,11 +143,7 @@ if __name__ == '__main__':
                 p_value = pd.DataFrame(p_value)
                 data_y = pd.DataFrame(data_y)
                 result = np.concatenate((p_value,data_y), axis=1)
-                print("result np")
-                print(result[:10,:])
                 result = pd.DataFrame(result, columns=['p', 'y'])
-                print("result df")
-                print(result.iloc[:10,:])
                 result = result.sort_values('p', ascending=True)
                 print("fin detect")
     
@@ -159,22 +158,12 @@ if __name__ == '__main__':
                 o_size = len(outlier_parray)
                 i_size = len(inlier_parray)
                 o_index = 0
+                print(inlier_parray[:10])
+                print(outlier_parray[:10])
                 for o in outlier_parray:
-                    #print("o")
-                    #print(str(o_index) + "/" + str(o_size))
-                    i_index = 0
-                    for i in inlier_parray:
-                        #print("i")
-                        #print(str(o_index) + "/" + str(o_size))
-                        #print(str(i_index) + "/" + str(i_size))
-                        if o < i:
-                            sum += 1.0
-                        elif o == i:
-                            sum += 0.5
-                        else:
-                            sum += 0
-                        i_index += 1
-                    o_index += 1
+                    nbr_inf, nbr_eq = count_occ(o, inlier_parray)
+                    sum += nbr_inf
+                    sum += nbr_eq / 2
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
                 print('AUC:{}'.format(AUC))
                 print("deuxieme boucle")

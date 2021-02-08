@@ -158,7 +158,7 @@ if __name__ == '__main__':
                 for o in outlier_parray:
                     #print("o")
                     #print(str(o_index) + "/" + str(o_size))
-                    #i_index = 0
+                    i_index = 0
                     for i in inlier_parray:
                         #print("i")
                         #print(str(o_index) + "/" + str(o_size))

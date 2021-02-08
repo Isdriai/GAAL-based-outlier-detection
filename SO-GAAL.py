@@ -173,11 +173,11 @@ if __name__ == '__main__':
                 o_size = len(outlier_parray)
                 i_size = len(inlier_parray)
                 start_index = 0
-                for o in outlier_parray:
-                    nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(o, inlier_parray, start_index)
+                for i in inlier_parray:
+                    nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
                     start_index = st_i
                     sum += nbr_inf
-                    sum += nbr_eq / 2
+                    sum += (nbr_eq * 0.5)
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
                 print('AUC:{}'.format(AUC))
                 print("deuxieme boucle")

@@ -67,7 +67,19 @@ def plot(train_history, name):
     plt.show()
 
 def count_occ_eq_and_inf(value, tab, start_index):
-    return None
+    nbr_occ = 0
+    index_first_occ = None
+    for i in range(start_index, len(tab)):
+        if tab[i] == value:
+            if index_first_occ == None:
+                index_first_occ = i
+            nbr_occ += 1
+        else tab[i] > value:
+            return index_first_occ if index_first_occ != None else i-1, nbr_occ, i
+    if tab[start_index] > value:
+        return 0, nbr_occ, start_index
+    else:
+        return None, None, None 
 
 
 if __name__ == '__main__':
@@ -157,11 +169,10 @@ if __name__ == '__main__':
                 print("boucle")
                 o_size = len(outlier_parray)
                 i_size = len(inlier_parray)
-                o_index = 0
-                print(inlier_parray[:10])
-                print(outlier_parray[:10])
+                start_index = 0
                 for o in outlier_parray:
-                    nbr_inf, nbr_eq = count_occ(o, inlier_parray)
+                    nbr_inf, nbr_eq, st_i  = count_occ(o, inlier_parray, start_index)
+                    start_index = st_i
                     sum += nbr_inf
                     sum += nbr_eq / 2
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))

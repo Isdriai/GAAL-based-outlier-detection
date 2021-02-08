@@ -2,6 +2,7 @@ from keras.layers import Input, Dense
 from keras.models import Sequential, Model
 from keras.optimizers import SGD
 import numpy as np
+import pandas as pd
 from scipy.sparse import csr_matrix
 from collections import defaultdict
 import matplotlib.pyplot as plt

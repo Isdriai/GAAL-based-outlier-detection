@@ -75,9 +75,13 @@ def count_occ_eq_and_inf(value, tab, start_index):
                 index_first_occ = i
             nbr_occ += 1
         elif tab[i] > value:
+            print("i")
+            print(i)
             return index_first_occ if index_first_occ != None else i, nbr_occ, i-1
     # si on croise pas de > donc quand tout le tab est < et/ou ==
     if index_first_occ == None:
+        print("coucou 2 ")
+        print(len(tab))
         return len(tab), 0, len(tab)
     else:
         print("coucou")

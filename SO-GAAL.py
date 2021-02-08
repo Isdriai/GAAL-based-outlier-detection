@@ -171,19 +171,6 @@ if __name__ == '__main__':
                     start_index = st_i
                     sum += nbr_inf
                     sum += (nbr_eq * 0.5)
-                print("sum count")
-                print(sum)
-                sum = 0.0
-                for o in outlier_parray:
-                    for i in inlier_parray:
-                        if o < i:
-                            sum += 1.0
-                        elif o == i:
-                            sum += 0.5
-                        else:
-                            sum += 0
-                print("sum normale")
-                print(sum)
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
                 print('AUC:{}'.format(AUC))
                 for i in range(num_batches):

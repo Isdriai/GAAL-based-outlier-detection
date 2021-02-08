@@ -79,7 +79,7 @@ def count_occ_eq_and_inf(value, tab, start_index):
     if tab[start_index] > value:
         return 0, nbr_occ, start_index
     else:
-        return None, None, None 
+        return len(tab), 0, len(tab) 
 
 
 if __name__ == '__main__':

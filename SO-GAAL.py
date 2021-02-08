@@ -2,7 +2,7 @@ from keras.layers import Input, Dense
 from keras.models import Sequential, Model
 from keras.optimizers import SGD
 import numpy as np
-import pandas as pd
+from scipy.sparse import csr_matrix
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import keras
@@ -132,7 +132,7 @@ if __name__ == '__main__':
             if epoch + 1 > args.stop_epochs:
                 stop = 1
 
-            if epoch % 10 == 0:
+            if True:
                 # Detection result
                 print("deb detect")
                 p_value = discriminator.predict(data_x)
@@ -140,7 +140,6 @@ if __name__ == '__main__':
                 data_y = pd.DataFrame(data_y)
                 result = np.concatenate((p_value,data_y), axis=1)
                 result = pd.DataFrame(result, columns=['p', 'y'])
-                result = result.sample(frac=0.1, replace=True, random_state=1)
                 result = result.sort_values('p', ascending=True)
                 print("fin detect")
     
@@ -156,13 +155,13 @@ if __name__ == '__main__':
                 i_size = len(inlier_parray)
                 o_index = 0
                 for o in outlier_parray:
-                    print("o")
-                    print(str(o_index) + "/" + str(o_size))
-                    i_index = 0
+                    #print("o")
+                    #print(str(o_index) + "/" + str(o_size))
+                    #i_index = 0
                     for i in inlier_parray:
-                        print("i")
-                        print(str(o_index) + "/" + str(o_size))
-                        print(str(i_index) + "/" + str(i_size))
+                        #print("i")
+                        #print(str(o_index) + "/" + str(o_size))
+                        #print(str(i_index) + "/" + str(i_size))
                         if o < i:
                             sum += 1.0
                         elif o == i:

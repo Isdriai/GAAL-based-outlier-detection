@@ -178,4 +178,5 @@ if __name__ == '__main__':
                     train_history['auc'].append(AUC)
                 print("fin auc")
 
+        print(train_history['auc'])
         plot(train_history, 'loss')

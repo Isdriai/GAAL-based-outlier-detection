@@ -165,11 +165,13 @@ if __name__ == '__main__':
                 o_size = len(outlier_parray)
                 i_size = len(inlier_parray)
                 start_index = 0
-                #for i in inlier_parray:
-                #    nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-                #    start_index = st_i
-                #    sum += nbr_inf
-                #    sum += (nbr_eq * 0.5)
+                for i in inlier_parray:
+                    nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+                    start_index = st_i
+                    sum += nbr_inf
+                    sum += (nbr_eq * 0.5)
+                print("sum count")
+                print(sum)
                 sum = 0.0
                 for o in outlier_parray:
                     for i in inlier_parray:
@@ -179,6 +181,8 @@ if __name__ == '__main__':
                             sum += 0.5
                         else:
                             sum += 0
+                print("sum normale")
+                print(sum)
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
                 print('AUC:{}'.format(AUC))
                 for i in range(num_batches):

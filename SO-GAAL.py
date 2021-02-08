@@ -75,11 +75,12 @@ def count_occ_eq_and_inf(value, tab, start_index):
                 index_first_occ = i
             nbr_occ += 1
         elif tab[i] > value:
-            return index_first_occ if index_first_occ != None else i-1, nbr_occ, i
-    if tab[start_index] > value:
-        return 0, nbr_occ, start_index
+            return index_first_occ if index_first_occ != None else i, nbr_occ, i
+    # si on croise pas de > donc quand tout le tab est < et/ou ==
+    if index_first_occ == None:
+        return len(tab), 0, len(tab)
     else:
-        return len(tab), 0, len(tab) 
+        return len(tab) - nbr_eq, nbr_eq, len(tab) 
 
 
 if __name__ == '__main__':
@@ -163,8 +164,10 @@ if __name__ == '__main__':
                 # Calculate the AUC
                 inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
                 print("inlier")
+                print(inlier_parray[:10])
                 outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
                 print("outlier")
+                print(outlier_parray[:10])
                 sum = 0.0
                 print("boucle")
                 o_size = len(outlier_parray)

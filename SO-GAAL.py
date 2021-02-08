@@ -151,25 +151,17 @@ if __name__ == '__main__':
 
             if True:
                 # Detection result
-                print("deb detect")
                 p_value = discriminator.predict(data_x)
                 p_value = pd.DataFrame(p_value)
                 data_y = pd.DataFrame(data_y)
                 result = np.concatenate((p_value,data_y), axis=1)
                 result = pd.DataFrame(result, columns=['p', 'y'])
                 result = result.sort_values('p', ascending=True)
-                print("fin detect")
     
-                print("deb auc")
                 # Calculate the AUC
                 inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
-                print("inlier")
-                print(inlier_parray[:10])
                 outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
-                print("outlier")
-                print(outlier_parray[:10])
                 sum = 0.0
-                print("boucle")
                 o_size = len(outlier_parray)
                 i_size = len(inlier_parray)
                 start_index = 0
@@ -180,7 +172,6 @@ if __name__ == '__main__':
                     sum += (nbr_eq * 0.5)
                 AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
                 print('AUC:{}'.format(AUC))
-                print("deuxieme boucle")
                 for i in range(num_batches):
                     train_history['auc'].append(AUC)
                 print("fin auc")

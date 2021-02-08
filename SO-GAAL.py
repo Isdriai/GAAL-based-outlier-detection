@@ -171,7 +171,7 @@ if __name__ == '__main__':
                 i_size = len(inlier_parray)
                 start_index = 0
                 for o in outlier_parray:
-                    nbr_inf, nbr_eq, st_i  = count_occ(o, inlier_parray, start_index)
+                    nbr_inf, nbr_eq, st_i  = count_occ_eq_and_inf(o, inlier_parray, start_index)
                     start_index = st_i
                     sum += nbr_inf
                     sum += nbr_eq / 2

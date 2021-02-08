@@ -80,6 +80,8 @@ def count_occ_eq_and_inf(value, tab, start_index):
     if index_first_occ == None:
         return len(tab), 0, len(tab)
     else:
+        print("coucou")
+        print(len(tab) - nbr_occ)
         return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
 
@@ -167,6 +169,8 @@ if __name__ == '__main__':
                 start_index = 0
                 for i in inlier_parray:
                     nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+                    print("nbr inf")
+                    print(nbr_inf)
                     start_index = st_i
                     sum += nbr_inf
                     sum += (nbr_eq * 0.5)

@@ -150,31 +150,30 @@ if __name__ == '__main__':
             if epoch + 1 > args.stop_epochs:
                 stop = 1
 
-            if True:
-                # Detection result
-                p_value = discriminator.predict(data_x)
-                p_value = pd.DataFrame(p_value)
-                data_y = pd.DataFrame(data_y)
-                result = np.concatenate((p_value,data_y), axis=1)
-                result = pd.DataFrame(result, columns=['p', 'y'])
-                result = result.sort_values('p', ascending=True)
-    
-                # Calculate the AUC
-                inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
-                outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
-                sum = 0.0
-                o_size = len(outlier_parray)
-                i_size = len(inlier_parray)
-                start_index = 0
-                for i in inlier_parray:
-                    nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-                    start_index = st_i
-                    sum += nbr_inf
-                    sum += (nbr_eq * 0.5)
-                AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
-                print('AUC:{}'.format(AUC))
-                for i in range(num_batches):
-                    train_history['auc'].append(AUC)
+            # Detection result
+            p_value = discriminator.predict(data_x)
+            p_value = pd.DataFrame(p_value)
+            data_y = pd.DataFrame(data_y)
+            result = np.concatenate((p_value,data_y), axis=1)
+            result = pd.DataFrame(result, columns=['p', 'y'])
+            result = result.sort_values('p', ascending=True)
+
+            # Calculate the AUC
+            inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
+            outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
+            sum = 0.0
+            o_size = len(outlier_parray)
+            i_size = len(inlier_parray)
+            start_index = 0
+            for i in inlier_parray:
+                nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+                start_index = st_i
+                sum += nbr_inf
+                sum += (nbr_eq * 0.5)
+            AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
+            print('AUC:{}'.format(AUC))
+            for i in range(num_batches):
+                train_history['auc'].append(AUC)
 
         print(train_history['auc'])
         plot(train_history, 'loss')

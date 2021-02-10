@@ -44,8 +44,8 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data():
-    data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
+def load_data(path_data = args.path):
+    data = pd.read_table('{path}'.format(path = path_data), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
     y = data.pop(1)
@@ -83,11 +83,39 @@ def count_occ_eq_and_inf(value, tab, start_index):
     else:
         return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
+def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
+    # Detection result
+    p_value = discriminator.predict(data_x)
+    p_value = pd.DataFrame(p_value)
+    data_y = pd.DataFrame(data_y)
+    result = np.concatenate((p_value,data_y), axis=1)
+    result = pd.DataFrame(result, columns=['p', 'y'])
+    result = result.sort_values('p', ascending=True)
+
+    # Calculate the AUC
+    inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
+    outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
+    sum = 0.0
+    o_size = len(outlier_parray)
+    i_size = len(inlier_parray)
+    start_index = 0
+    for i in inlier_parray:
+        nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+        start_index = st_i
+        sum += nbr_inf
+        sum += (nbr_eq * 0.5)
+    AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
+    print(to_print + ':{}'.format(AUC))
+    for i in range(num_batches):
+        train_history[field].append(AUC)
 
 if __name__ == '__main__':
     train = True
     args = parse_args()
     data_x, data_y, data_id = load_data()
+    data_x_test, data_y_test, data_id_test = None, None, None
+    if args.path == "nsl-kdd/KDDTrainproc":
+        data_x_test, data_y_test, data_id_test = load_data(path_data=nsl-kdd/KDDTestproc)
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]
@@ -150,30 +178,19 @@ if __name__ == '__main__':
             if epoch + 1 > args.stop_epochs:
                 stop = 1
 
-            # Detection result
-            p_value = discriminator.predict(data_x)
-            p_value = pd.DataFrame(p_value)
-            data_y = pd.DataFrame(data_y)
-            result = np.concatenate((p_value,data_y), axis=1)
-            result = pd.DataFrame(result, columns=['p', 'y'])
-            result = result.sort_values('p', ascending=True)
 
-            # Calculate the AUC
-            inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
-            outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
-            sum = 0.0
-            o_size = len(outlier_parray)
-            i_size = len(inlier_parray)
-            start_index = 0
-            for i in inlier_parray:
-                nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-                start_index = st_i
-                sum += nbr_inf
-                sum += (nbr_eq * 0.5)
-            AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
-            print('AUC:{}'.format(AUC))
-            for i in range(num_batches):
-                train_history['auc'].append(AUC)
+            # Calc auc train
+
+            calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y)
+
+            # calc auc test Test
+
+            if args.path == "nsl-kdd/KDDTrainproc":
+                calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
+
 
         print(train_history['auc'])
+        if args.path == "nsl-kdd/KDDTrainproc":
+            print(train_history['auc_test'])
+        
         plot(train_history, 'loss')

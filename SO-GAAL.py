@@ -44,7 +44,7 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data(path_data = args.path):
+def load_data(path_data):
     data = pd.read_table('{path}'.format(path = path_data), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
@@ -112,7 +112,7 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
-    data_x, data_y, data_id = load_data()
+    data_x, data_y, data_id = load_data(args.path)
     data_x_test, data_y_test, data_id_test = None, None, None
     if args.path == "nsl-kdd/KDDTrainproc":
         data_x_test, data_y_test, data_id_test = load_data(path_data=nsl-kdd/KDDTestproc)

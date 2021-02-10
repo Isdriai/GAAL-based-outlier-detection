@@ -114,7 +114,7 @@ if __name__ == '__main__':
     args = parse_args()
     data_x, data_y, data_id = load_data(args.path)
     data_x_test, data_y_test, data_id_test = None, None, None
-    if args.path == "nsl-kdd/KDDTrainproc":
+    if args.path == "Data/nsl-kdd/KDDTrainproc":
         data_x_test, data_y_test, data_id_test = load_data(path_data=nsl-kdd/KDDTestproc)
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
@@ -185,12 +185,12 @@ if __name__ == '__main__':
 
             # calc auc test Test
 
-            if args.path == "nsl-kdd/KDDTrainproc":
+            if args.path == "Data/nsl-kdd/KDDTrainproc":
                 calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
 
 
         print(train_history['auc'])
-        if args.path == "nsl-kdd/KDDTrainproc":
+        if args.path == "Data/nsl-kdd/KDDTrainproc":
             print(train_history['auc_test'])
         
         plot(train_history, 'loss')

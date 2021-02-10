@@ -115,7 +115,7 @@ if __name__ == '__main__':
     data_x, data_y, data_id = load_data(args.path)
     data_x_test, data_y_test, data_id_test = None, None, None
     if args.path == "Data/nsl-kdd/KDDTrainproc":
-        data_x_test, data_y_test, data_id_test = load_data(path_data=nsl-kdd/KDDTestproc)
+        data_x_test, data_y_test, data_id_test = load_data(path_data="nsl-kdd/KDDTestproc")
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

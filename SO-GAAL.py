@@ -44,8 +44,8 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data(path_data):
-    data = pd.read_table('{path}'.format(path = path_data), sep=',', header=None)
+def load_data():
+    data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
     y = data.pop(1)
@@ -113,9 +113,13 @@ if __name__ == '__main__':
     train = True
     args = parse_args()
     data_x, data_y, data_id = load_data(args.path)
-    data_x_test, data_y_test, data_id_test = None, None, None
-    if args.path == "Data/nsl-kdd/KDDTrainproc":
-        data_x_test, data_y_test, data_id_test = load_data(path_data="Data/nsl-kdd/KDDTestproc")
+    data_x_test, data_y_test = None, None
+    if args.path == "Data/nsl-kdd/KDDproc":
+        rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
+        data_x_test = data_x[rows]
+        data_x = data_x[~rows]
+        data_y_test = data_y[rows]
+        data_y = data_y[~rows]
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]
@@ -185,12 +189,12 @@ if __name__ == '__main__':
 
             # calc auc test Test
 
-            if args.path == "Data/nsl-kdd/KDDTrainproc":
+            if args.path == "Data/nsl-kdd/KDDproc":
                 calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
 
 
         print(train_history['auc'])
-        if args.path == "Data/nsl-kdd/KDDTrainproc":
+        if args.path == "Data/nsl-kdd/KDDproc":
             print(train_history['auc_test'])
         
         plot(train_history, 'loss')

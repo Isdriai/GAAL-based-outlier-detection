@@ -112,7 +112,7 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
-    data_x, data_y, data_id = load_data(args.path)
+    data_x, data_y, data_id = load_data()
     data_x_test, data_y_test = None, None
     if args.path == "Data/nsl-kdd/KDDproc":
         rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)

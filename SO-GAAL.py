@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import keras
 import math
 import argparse
+from datetime import date
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run SO-GAAL.")
@@ -67,7 +68,7 @@ def load_data(args):
 
 # Plot loss history
 # Plot loss history
-def plot(train_history, name):
+def plot(train_history, name, args):
     #dy = train_history['discriminator_loss']
     #gy = train_history['generator_loss']
     #x = np.linspace(1, len(aucy), len(aucy))
@@ -86,7 +87,7 @@ def plot(train_history, name):
     ax = fig.get_axes()[0]
     #plt.setp(ax.get_yticklabels(), visible=False)
 
-    plt.show()
+    plt.savefig("res_db_{}_LRs_{}_{}_{}.png").format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today())
 
 def count_occ_eq_and_inf(value, tab, start_index):
     nbr_occ = 0
@@ -228,4 +229,4 @@ if __name__ == '__main__':
         if args["path"] == "Data/nsl-kdd/KDDproc":
             print(train_history['auc_test'])
         
-        plot(train_history, 'loss')
+        plot(train_history, 'AUC', args)

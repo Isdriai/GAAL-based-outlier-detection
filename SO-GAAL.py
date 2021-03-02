@@ -23,7 +23,18 @@ def parse_args():
                         help='Decay.')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum.')
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    
+    dict_args = {
+        'path'        : args.path,
+        'stop_epochs' : args.stop_epochs,
+        'lr_d'        : args.lr_d,
+        'lr_g'        : args.lr_g,
+        'decay'       : args.decay,
+        'momentum'    : args.momentum
+    }
+    return dict_args
 
 # Generator
 def create_generator(latent_size):
@@ -131,7 +142,7 @@ def load_args():
 
 if __name__ == '__main__':
     train = True
-    args = load_args()
+    args = parse_args()
     data_x, data_y, data_id = load_data(args)
     data_x_test, data_y_test = None, None
     if args["path"] == "Data/nsl-kdd/KDDproc":

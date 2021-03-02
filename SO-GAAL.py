@@ -44,8 +44,8 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data():
-    data = pd.read_table('{path}'.format(path = args.path), sep=',', header=None)
+def load_data(args):
+    data = pd.read_table('{path}'.format(path = args["path"]), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
     id = data.pop(0)
     y = data.pop(1)
@@ -55,15 +55,26 @@ def load_data():
     return data_x, data_y, data_id
 
 # Plot loss history
+# Plot loss history
 def plot(train_history, name):
-    dy = train_history['discriminator_loss']
-    gy = train_history['generator_loss']
-    aucy = train_history['auc']
-    x = np.linspace(1, len(dy), len(dy))
-    fig, ax = plt.subplots()
-    ax.plot(x, dy, color='green')
-    ax.plot(x, gy,color='red')
-    ax.plot(x, aucy, color='yellow', linewidth = '3')
+    #dy = train_history['discriminator_loss']
+    #gy = train_history['generator_loss']
+    #x = np.linspace(1, len(aucy), len(aucy))
+    #ax.plot(x, dy, color='green')
+    #ax.plot(x, gy,color='red')
+    
+    plt.style.use("ggplot")
+    fig = plt.figure()
+    plt.plot(np.arange(0, len(train_history["auc"])), train_history["auc"], color="red", label="train acc")
+    if "auc_test" in train_history:
+      plt.plot(np.arange(0, len(train_history["auc_test"])), train_history["auc_test"], color='blue', label="test acc")
+    plt.title("ACC")
+    plt.xlabel("Epoch #")
+    plt.ylabel("Acc")
+    plt.legend(loc="upper right")
+    ax = fig.get_axes()[0]
+    #plt.setp(ax.get_yticklabels(), visible=False)
+
     plt.show()
 
 def count_occ_eq_and_inf(value, tab, start_index):
@@ -104,17 +115,26 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
         start_index = st_i
         sum += nbr_inf
         sum += (nbr_eq * 0.5)
-    AUC = '{:.4f}'.format(sum / (len(inlier_parray) * len(outlier_parray)))
-    print(to_print + ':{}'.format(AUC))
-    for i in range(num_batches):
-        train_history[field].append(AUC)
+    AUC = (sum / (len(inlier_parray) * len(outlier_parray)))
+    print(to_print + "  " +"{:.4f}".format(AUC))
+    train_history[field].append(AUC)
+
+def load_args():
+  args = {}
+  args["path"] = "Data/nsl-kdd/KDDproc"
+  args["stop_epochs"] = 100
+  args["lr_d"] = 0.2
+  args["lr_g"] = 0.2
+  args["decay"] = 1e-6
+  args["momentum"] = 0.9
+  return args
 
 if __name__ == '__main__':
     train = True
-    args = parse_args()
-    data_x, data_y, data_id = load_data()
+    args = load_args()
+    data_x, data_y, data_id = load_data(args)
     data_x_test, data_y_test = None, None
-    if args.path == "Data/nsl-kdd/KDDproc":
+    if args["path"] == "Data/nsl-kdd/KDDproc":
         rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
         data_x_test = data_x[rows]
         data_x = data_x[~rows]
@@ -125,12 +145,12 @@ if __name__ == '__main__':
         latent_size = data_x.shape[1]
         data_size = data_x.shape[0]
         stop = 0
-        epochs = args.stop_epochs * 3
+        epochs = args["stop_epochs"] * 3
         train_history = defaultdict(list)
 
         # Create discriminator
         discriminator = create_discriminator()
-        discriminator.compile(optimizer=SGD(lr=args.lr_d, decay=args.decay, momentum=args.momentum), loss='binary_crossentropy')
+        discriminator.compile(optimizer=SGD(lr=args["lr_d"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
 
         # Create combine model
         generator = create_generator(latent_size)
@@ -139,7 +159,7 @@ if __name__ == '__main__':
         discriminator.trainable = False
         fake = discriminator(fake)
         combine_model = Model(latent, fake)
-        combine_model.compile(optimizer=SGD(lr=args.lr_g, decay=args.decay, momentum=args.momentum), loss='binary_crossentropy')
+        combine_model.compile(optimizer=SGD(lr=args["lr_g"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
 
         # Start iteration
         for epoch in range(epochs):
@@ -179,7 +199,7 @@ if __name__ == '__main__':
                     train_history['generator_loss'].append(generator_loss)
 
             # Stop training generator
-            if epoch + 1 > args.stop_epochs:
+            if epoch + 1 > args["stop_epochs"]:
                 stop = 1
 
 
@@ -189,12 +209,12 @@ if __name__ == '__main__':
 
             # calc auc test Test
 
-            if args.path == "Data/nsl-kdd/KDDproc":
+            if args["path"] == "Data/nsl-kdd/KDDproc":
                 calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
 
 
         print(train_history['auc'])
-        if args.path == "Data/nsl-kdd/KDDproc":
+        if args["path"] == "Data/nsl-kdd/KDDproc":
             print(train_history['auc_test'])
         
         plot(train_history, 'loss')

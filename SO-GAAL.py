@@ -4,6 +4,8 @@ from keras.optimizers import SGD
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import keras
 import math

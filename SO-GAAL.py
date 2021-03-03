@@ -89,7 +89,7 @@ def plot(train_history, name, args):
     ax = fig.get_axes()[0]
     #plt.setp(ax.get_yticklabels(), visible=False)
 
-    plt.savefig("res_db_{}_LRs_{}_{}_{}.png").format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today())
+    plt.savefig("res_db_{}_LRs_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today()))
 
 def count_occ_eq_and_inf(value, tab, start_index):
     nbr_occ = 0

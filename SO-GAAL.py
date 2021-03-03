@@ -11,6 +11,8 @@ import keras
 import math
 import argparse
 from datetime import date
+from datetime import datetime
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run SO-GAAL.")
@@ -88,8 +90,12 @@ def plot(train_history, name, args):
     plt.legend(loc="upper right")
     ax = fig.get_axes()[0]
     #plt.setp(ax.get_yticklabels(), visible=False)
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
 
-    plt.savefig("res_db_{}_LRs_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today()))
+    name = "res_db_{}_LRs_{}_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today(), current_time)
+    print("on sav dans le fichier: " + name)
+    plt.savefig(name)
 
 def count_occ_eq_and_inf(value, tab, start_index):
     nbr_occ = 0

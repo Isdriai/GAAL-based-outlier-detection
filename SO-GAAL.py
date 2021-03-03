@@ -231,4 +231,5 @@ if __name__ == '__main__':
         if args["path"] == "Data/nsl-kdd/KDDproc":
             print(train_history['auc_test'])
         
+        print("maintenant on affiche")
         plot(train_history, 'AUC', args)

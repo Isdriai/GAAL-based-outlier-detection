@@ -41,7 +41,6 @@ def recolt_features(obj, i, path="p"):
             recolt_features(attr_value, i, new_path)
         else:
             new_path = new_path[2:] # remove "p."
-            #pdb.set_trace()
             set_feature(new_path, i, attr_value)
 
 nbr_print = 10000
@@ -51,7 +50,11 @@ def print_avancement(i, ts):
         print(str(delta_format(ts)))
 
 def delta_format(ts):
-    return datetime.datetime.utcfromtimestamp(ts) - datetime.timedelta(hours=3) # in my case it's 3h because my first packet has as datetime 11:58:58 and the begin of capture is ~9am
+    dt_ts = datetime.datetime.utcfromtimestamp(ts)
+    to_print = True
+    if to_print:
+        print(dt_ts)
+    return  dt_ts - datetime.timedelta(hours=3) # in my case it's 3h because my first packet has as datetime 11:58:58 and the begin of capture is ~9am
 
 
 def go_feat(b, i, ts):
@@ -64,7 +67,7 @@ def go_features():
 
     threads = set()
     for i, (ts, buf) in enumerate(packets):    
-        if i == 10000:
+        if i == 1:
             break    
 
         go_feat(buf, i, ts)
@@ -105,3 +108,5 @@ def recolt_label(x):
         return 0
 
 df['label'] = df.apply(recolt_label, axis=1)
+
+df.to_csv("pcap.csv")

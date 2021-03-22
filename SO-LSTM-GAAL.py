@@ -9,7 +9,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import keras
 import math
-import argparse
 from datetime import date
 from datetime import datetime
 
@@ -119,7 +118,7 @@ def load_args():
 
 if __name__ == '__main__':
     train = True
-    args = parse_args()
+    args = load_args()
     data_x, data_y, data_id = load_data(args)
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
     data_x_test = data_x[rows]

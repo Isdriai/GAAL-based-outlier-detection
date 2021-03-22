@@ -16,21 +16,21 @@ from datetime import datetime
 # Generator
 def create_generator(latent_size):
     gen = Sequential()
-    #gen.add(Dense(latent_size, input_dim=latent_size, activation='relu', kernel_initializer=keras.initializers.Identity(gain=1.0)))
-    gen.add(Bidirectional(LSTM(latent_size, input_dim=latent_size)))
+    gen.add(Dense(latent_size, input_dim=latent_size, activation='relu', kernel_initializer=keras.initializers.Identity(gain=1.0)))
+    #gen.add(Bidirectional(LSTM(latent_size, input_dim=latent_size)))
     gen.add(Dense(latent_size, activation='relu', kernel_initializer=keras.initializers.Identity(gain=1.0)))
-    latent = Input(shape=(latent_size, 1))
-    fake_data = gen(latent, 1)
+    latent = Input(shape=(latent_size,))
+    fake_data = gen(latent)
     return Model(latent, fake_data)
 
 # Discriminator
-def create_discriminator(latent_size, data_size):
+def create_discriminator(latent_size):
     dis = Sequential()
     #dis.add(Dense(math.ceil(math.sqrt(data_size)), input_dim=latent_size, activation='relu', kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
-    dis.add(Bidirectional(LSTM(math.ceil(math.sqrt(data_size)), input_dim=latent_size)))
+    dis.add(Bidirectional(LSTM(math.ceil(math.sqrt(latent_size)), input_dim=latent_size)))
     dis.add(Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
     data = Input(shape=(latent_size, 1))
-    fake = dis(data, 1)
+    fake = dis(data)
     return Model(data, fake)
 
 # Load data
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         train_history = defaultdict(list)
 
         # Create discriminator
-        discriminator = create_discriminator(latent_size, data_size)
+        discriminator = create_discriminator(latent_size)
         discriminator.compile(optimizer=SGD(lr=args["lr_d"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
 
         # Create combine model

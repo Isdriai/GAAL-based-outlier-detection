@@ -27,7 +27,7 @@ def create_generator(latent_size):
 def create_discriminator(latent_size, data_size):
     dis = Sequential()
     #dis.add(Dense(math.ceil(math.sqrt(data_size)), input_dim=latent_size, activation='relu', kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
-    dis.add(Bidirectional(LSTM(math.ceil(math.sqrt(data_size)), input_size=latent_size)))
+    dis.add(Bidirectional(LSTM(math.ceil(math.sqrt(data_size)), input_dim=latent_size)))
     dis.add(Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
     data = Input(shape=(latent_size, 1))
     fake = dis(data, 1)

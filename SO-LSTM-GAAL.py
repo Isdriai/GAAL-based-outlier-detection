@@ -40,7 +40,7 @@ def load_data(args):
     print(data.columns)
     y = data.pop("Label")
     data_x = data.values
-    data_id = data.pop(0)
+    data_id = data.drop(0, axis=1)
     data_y = y.values
     return data_x, data_y, data_id
 

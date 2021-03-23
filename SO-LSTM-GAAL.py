@@ -37,8 +37,7 @@ def create_discriminator(latent_size):
 def load_data(args):
     data = pd.read_table('{path}'.format(path = args["path"]), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
-    id = data.pop(0)
-    y = data.pop(1)
+    y = data.pop("Label")
     data_x = data.values
     data_id = id.values
     data_y = y.values
@@ -127,7 +126,7 @@ if __name__ == '__main__':
     data_y = data_y[~rows]
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
-        latent_size = data_x.shape[1] - 1 # -1 because timestamp
+        latent_size = data_x.shape[1]
         data_size = data_x.shape[0]
         stop = 0
         epochs = args["stop_epochs"] * 3

@@ -117,10 +117,15 @@ def get_label(row_df):
     else:
         return 1
 
+print("ip src in progress")
 df['ip.src'] = df['ip.src'].apply(lambda x: socket.inet_ntop(socket.AF_INET, x) if x == x else x) # the if statement is here for the case where x = nan
+print("ip dst in progress")
 df['ip.dst'] = df['ip.dst'].apply(lambda x: socket.inet_ntop(socket.AF_INET, x) if x == x else x) 
 
 
 df['Label'] = df.apply(get_label, axis=1)
 
-df.to_csv("pcap.csv")
+timestamps = df.pop("timestamp")
+df.insert(0, "timestamp", timestamps)
+
+df.to_csv("Data/cic_ids_2017/pcap.csv")

@@ -37,6 +37,7 @@ def create_discriminator(latent_size):
 def load_data(args):
     data = pd.read_table('{path}'.format(path = args["path"]), sep=',', header=None)
     data = data.sample(frac=1).reset_index(drop=True)
+    print(data.columns)
     y = data.pop("Label")
     data_x = data.values
     data_id = id.values

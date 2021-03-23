@@ -167,9 +167,9 @@ if __name__ == '__main__':
                 # Generate potential outliers
                 generated_data = generator.predict(noise, verbose=0)
                 print("data batch")
-                print(data_batch)
+                print(data_batch.shape)
                 print("generated date")
-                print(generated_data)
+                print(generated_data.shape)
                 # Concatenate real data to generated data
                 X = np.concatenate((data_batch, generated_data))
                 Y = np.array([1] * batch_size + [0] * int(noise_size))

@@ -39,10 +39,9 @@ def create_discriminator(latent_size):
 # Load data
 def load_data(args):
     data = pd.read_csv('{path}'.format(path = args["path"]), sep=',', index_col=0)
-    data = data.sample(frac=1).reset_index(drop=True)
+    data = data.sample(frac=1)
     y = data.pop("Label")
     tmps = data.pop("timestamp")
-    pdb.set_trace()
     return data, y, tmps
 
 def plot(train_history, name, args):
@@ -122,12 +121,13 @@ if __name__ == '__main__':
     args = load_args()
     data_x, data_y, tmps = load_data(args)
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
-    data_x_test = data_x[rows]
-    tmps_test = tmps[rows]
-    data_x = data_x[~rows]
-    tmps = tmps[~rows]
-    data_y_test = data_y[rows]
-    data_y = data_y[~rows]
+    data_x_test = data_x.iloc[rows]
+    tmps_test = tmps.iloc[rows]
+    data_x = data_x.iloc[~rows]
+    tmps = tmps.iloc[~rows]
+    data_y_test = data_y.iloc[rows]
+    data_y = data_y.iloc[~rows]
+    pdb.set_trace()
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

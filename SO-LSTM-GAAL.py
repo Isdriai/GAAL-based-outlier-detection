@@ -38,7 +38,7 @@ def create_discriminator(latent_size):
 
 # Load data
 def load_data(args):
-    data = pd.read_csv('{path}'.format(path = args["path"]), sep=',')
+    data = pd.read_csv('{path}'.format(path = args["path"]), sep=',', index_col=0)
     data = data.sample(frac=1).reset_index(drop=True)
     pdb.set_trace()
     y = data.pop("Label")

@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
                 # Get training data
                 data_batch = data_x[index * batch_size: (index + 1) * batch_size]
-                data_batch = data_batch.reshape((data_batch.shape[1], 1))
+                data_batch = data_batch.reshape((data_batch.shape[0], data_batch.shape[1], 1))
 
                 # Generate potential outliers
                 generated_data = generator.predict(noise, verbose=0)

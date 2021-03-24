@@ -40,12 +40,9 @@ def create_discriminator(latent_size):
 def load_data(args):
     data = pd.read_csv('{path}'.format(path = args["path"]), sep=',', index_col=0)
     data = data.sample(frac=1).reset_index(drop=True)
-    pdb.set_trace()
     y = data.pop("Label")
-    data_x = data.values
     tmps = data.pop("timestamp")
-    data_y = y.values
-    return data_x, data_y, tmps
+    return data, y, tmps
 
 def plot(train_history, name, args):
     

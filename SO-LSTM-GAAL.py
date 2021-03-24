@@ -11,7 +11,7 @@ import keras
 import math
 from datetime import date
 from datetime import datetime
-
+import pdb
 
 # Generator
 def create_generator(latent_size):
@@ -40,6 +40,7 @@ def create_discriminator(latent_size):
 def load_data(args):
     data = pd.read_csv('{path}'.format(path = args["path"]), sep=',')
     data = data.sample(frac=1).reset_index(drop=True)
+    pdb.set_trace()
     y = data.pop("Label")
     data_x = data.values
     tmps = data.pop("timestamp")

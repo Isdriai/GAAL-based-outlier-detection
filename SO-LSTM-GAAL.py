@@ -42,7 +42,7 @@ def load_data(args):
     data = data.sample(frac=1)
     y = data.pop("Label")
     tmps = data.pop("timestamp")
-    return data, y, tmps
+    return data.values, y.values, tmps.values
 
 def plot(train_history, name, args):
     
@@ -121,12 +121,12 @@ if __name__ == '__main__':
     args = load_args()
     data_x, data_y, tmps = load_data(args)
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
-    data_x_test = data_x.iloc[rows]
-    tmps_test = tmps.iloc[rows]
-    data_x = data_x.iloc[~rows]
-    tmps = tmps.iloc[~rows]
-    data_y_test = data_y.iloc[rows]
-    data_y = data_y.iloc[~rows]
+    data_x_test = data_x[rows]
+    tmps_test = tmps[rows]
+    data_x = data_x[~rows]
+    tmps = tmps[~rows]
+    data_y_test = data_y[rows]
+    data_y = data_y[~rows]
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]
@@ -163,8 +163,8 @@ if __name__ == '__main__':
 
                 # Get training data
                 ids_train = (index * batch_size, (index + 1) * batch_size)
-                data_batch = data_x[ids_train[0]: ids_train[1]]
-                data_batch.concatenate(tmps[ids_train[0]: ids_train[1]])
+                data_batch = data_x.iloc[ids_train[0]: ids_train[1],]
+                data_batch.concatenate(tmps.iloc[ids_train[0]: ids_train[1]])
                 data_batch = data_batch.reshape((data_batch.shape[1], 1))
 
                 # Generate potential outliers

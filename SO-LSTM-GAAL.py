@@ -12,6 +12,7 @@ import math
 from datetime import date
 from datetime import datetime
 import pdb
+import tensorflow as tf
 
 # Generator
 def create_generator(latent_size):
@@ -39,7 +40,6 @@ def create_discriminator(latent_size):
 # Load data
 def load_data(args):
     data = pd.read_csv('{path}'.format(path = args["path"]), sep=',', index_col=0, dtype=object)
-    data = data.sample(frac=1)
     y = data.pop("Label")
     TIMESTAMP = "timestamp"
     data[TIMESTAMP] = data.pop(TIMESTAMP) # go to the end
@@ -172,7 +172,7 @@ if __name__ == '__main__':
                 Y = np.array([1] * batch_size + [0] * int(noise_size))
 
                 # Train discriminator
-                discriminator_loss = discriminator.train_on_batch(X, Y)
+                discriminator_loss = discriminator.train_on_batch(tf.convert_to_tensor(X), tf.convert_to_tensor(Y))
                 train_history['discriminator_loss'].append(discriminator_loss)
 
                 # Train generator

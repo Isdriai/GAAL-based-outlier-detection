@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
                 # Get training data
                 ids_train = (index * batch_size, (index + 1) * batch_size)
-                data_batch = data_x.iloc[ids_train[0]: ids_train[1],]
+                data_batch = data_x[ids_train[0]: ids_train[1],]
                 data_batch.concatenate(tmps[ids_train[0]: ids_train[1]])
                 data_batch = data_batch.reshape((data_batch.shape[1], 1))
 

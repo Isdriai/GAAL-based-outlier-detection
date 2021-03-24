@@ -12,7 +12,6 @@ import math
 from datetime import date
 from datetime import datetime
 import pdb
-import tensorflow as tf
 
 # Generator
 def create_generator(latent_size):
@@ -172,7 +171,7 @@ if __name__ == '__main__':
                 Y = np.array([1] * batch_size + [0] * int(noise_size))
 
                 # Train discriminator
-                discriminator_loss = discriminator.train_on_batch(tf.convert_to_tensor(X), tf.convert_to_tensor(Y))
+                discriminator_loss = discriminator.train_on_batch(np.asarray(X).astype('float32'), np.asarray(Y).astype('float32'))
                 train_history['discriminator_loss'].append(discriminator_loss)
 
                 # Train generator

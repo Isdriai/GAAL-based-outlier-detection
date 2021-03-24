@@ -42,6 +42,7 @@ def load_data(args):
     data = data.sample(frac=1).reset_index(drop=True)
     y = data.pop("Label")
     tmps = data.pop("timestamp")
+    pdb.set_trace()
     return data, y, tmps
 
 def plot(train_history, name, args):

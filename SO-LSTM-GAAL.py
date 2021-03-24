@@ -127,7 +127,6 @@ if __name__ == '__main__':
     tmps = tmps.iloc[~rows]
     data_y_test = data_y.iloc[rows]
     data_y = data_y.iloc[~rows]
-    pdb.set_trace()
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

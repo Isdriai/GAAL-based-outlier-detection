@@ -125,6 +125,8 @@ if __name__ == '__main__':
     data_x, data_y, tmps = load_data(args)
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
     data_x_test = data_x[rows]
+    print(type(data_x))
+    print(type(tmps))
     tmps_test = tmps[rows]
     data_x = data_x[~rows]
     tmps = tmps[~rows]

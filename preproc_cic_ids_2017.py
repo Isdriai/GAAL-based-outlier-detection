@@ -6,10 +6,7 @@ import datetime
 import collections
 import socket
 
-#path_file = 'Data/cic_ids_2017/sub_pcap/sub_Thurday_00000_20170706135858.pcap'
-#path_file = 'Data/cic_ids_2017/sub_pcap/Thursday-WorkingHours.pcap'
-
-path_file = 'Data/cic_ids_2017/sub_pcap/sub_Thurday_00003_20170706143602.pcap'
+path_file = 'Data/cic_ids_2017/Thursday-WorkingHours.pcap'
 
 f = open(path_file, 'rb')
 packets = dpkt.pcapng.Reader(f)
@@ -59,18 +56,39 @@ def delta_format(ts):
         print(dt_ts)
     return  dt_ts - datetime.timedelta(hours=3) # in my case it's 3h because my first packet has as datetime 11:58:58 and the begin of capture is ~9am
 
+def recolt_feat(feat, path, obj, i):
+    root = path.split(".")[0]
+    if root in dir(obj):
+        value = obj.__getattribute__(root)
+        if not("." in path): # ca veut dire qu'on a trouvé
+            if feat in hierarchie.keys():
+                hierarchie[feat][i] = value
+            else:
+                hierarchie[feat] = collections.OrderedDict()
+                hierarchie[feat][i] = value
+        else: # On doit rentrer plus en profondeur
+            recolt_feat(feat, ".".join(path.split(".")[1:]), value, i)
+    else:
+        if feat in hierarchie.keys():
+            hierarchie[feat][i] = np.NaN
+        else:
+            hierarchie[feat] = collections.OrderedDict()
+            hierarchie[feat][i] = np.NaN
 
 def go_feat(b, i, ts):
     pck = dpkt.ethernet.Ethernet(b)
-    recolt_features(pck, i)
+    #recolt_features(pck, i)
+    path = "ip.src"
+    recolt_feat(path, path, pck, i)
+    path = "ip.dst"
+    recolt_feat(path, path, pck, i)
     set_feature("timestamp", i, ts, format_method=delta_format)
     print_avancement(i, ts)
 
 def go_features():
-
     for i, (ts, buf) in enumerate(packets):    
         go_feat(buf, i, ts)
-
+        
 go_features()
 df = pd.DataFrame(hierarchie, columns=hierarchie.keys())
 
@@ -86,12 +104,7 @@ alerts['Interval'] = alerts[['Start', 'Stop',]].apply(
     axis=1
 )
 
-i = 0
 def get_label(row_df):
-    global i
-    if i % 10000 == 0:
-        print("i label: " + str(i))
-    i += 1
     # Find incident description where time matches
     idx_time = alerts.Interval.apply(lambda iv: row_df.timestamp in iv)
 
@@ -128,4 +141,4 @@ df['Label'] = df.apply(get_label, axis=1)
 timestamps = df.pop("timestamp")
 df.insert(0, "timestamp", timestamps)
 
-df.to_csv("Data/cic_ids_2017/pcap.csv")
+df.to_csv("Data/cic_ids_2017/pcap_light.csv")

@@ -100,7 +100,8 @@ def plot(train_history, name, args):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res_db_{}_LRs_{}_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], date.today(), current_time)
+    name = "res/res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time)
+
     print("on sav dans le fichier: " + name)
     plt.savefig(name)
 

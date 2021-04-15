@@ -68,10 +68,12 @@ def load_data(path_data):
     df = pd.DataFrame()
 
     for file in glob.glob("*.h5"):
+        pdb.set_trace()
         features = h5py.File(file, mode='r')['vectors']
         np_array = np.array(features)
         df = df.append(pd.DataFrame(np_array), ignore_index=True)
 
+    pdb.set_trace()
     csvs = glob.glob("*.csv")
 
     assert(len(csvs) == 1)
@@ -155,6 +157,7 @@ if __name__ == '__main__':
     args = parse_args()
     data_x, data_y = load_data(args["path"]) # faut mettre le dossier, apres load_data se charge du reste
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
+    pdb.set_trace()
     data_x_test = data_x[rows]
     data_x = data_x[~rows]
     data_y_test = data_y[rows]

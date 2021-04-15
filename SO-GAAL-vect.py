@@ -78,7 +78,7 @@ def load_data(path_data):
 
     labels = pd.read_table(csvs[0], sep=',')["Label"]
 
-    return df, labels
+    return df.values, labels.values
 
 # Plot loss history
 # Plot loss history
@@ -155,7 +155,6 @@ if __name__ == '__main__':
     args = parse_args()
     data_x, data_y = load_data(args["path"]) # faut mettre le dossier, apres load_data se charge du reste
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
-    pdb.set_trace()
     data_x_test = data_x[rows]
     data_x = data_x[~rows]
     data_y_test = data_y[rows]

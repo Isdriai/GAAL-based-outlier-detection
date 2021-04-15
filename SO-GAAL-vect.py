@@ -153,7 +153,6 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
-    pdb.set_trace()
     data_x, data_y = load_data(args["path"]) # faut mettre le dossier, apres load_data se charge du reste
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
     data_x_test = data_x[rows]

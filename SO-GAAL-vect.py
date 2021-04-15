@@ -135,8 +135,8 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     result = result.sort_values('p', ascending=True)
 
     # Calculate the AUC
-    inlier_parray = result.loc[lambda df: df.y == "nor", 'p'].values
-    outlier_parray = result.loc[lambda df: df.y == "out", 'p'].values
+    inlier_parray = result.loc[lambda df: df.y == 0.0]["p"].values
+    outlier_parray = result.loc[lambda df: df.y == 1.0]["p"].values
     sum = 0.0
     o_size = len(outlier_parray)
     i_size = len(inlier_parray)

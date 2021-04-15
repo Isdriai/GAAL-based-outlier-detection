@@ -68,12 +68,10 @@ def load_data(path_data):
     df = pd.DataFrame()
 
     for file in glob.glob("*.h5"):
-        pdb.set_trace()
         features = h5py.File(file, mode='r')['vectors']
         np_array = np.array(features)
         df = df.append(pd.DataFrame(np_array), ignore_index=True)
 
-    pdb.set_trace()
     csvs = glob.glob("*.csv")
 
     assert(len(csvs) == 1)

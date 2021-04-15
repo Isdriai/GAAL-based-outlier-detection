@@ -14,11 +14,12 @@ from datetime import date
 from datetime import datetime
 import glob, os
 import h5py
+import pdb
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run SO-GAAL.")
-    parser.add_argument('--path', nargs='?', default='Data/Annthyroid',
+    parser.add_argument('--path', nargs='?', default='Data/cic_ids_2017',
                         help='Input data path.')
     parser.add_argument('--stop_epochs', type=int, default=20,
                         help='Stop training generator after stop_epochs.')
@@ -150,6 +151,7 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
+    pdb.set_trace()
     data_x, data_y = load_data(args["path"]) # faut mettre le dossier, apres load_data se charge du reste
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
     data_x_test = data_x[rows]

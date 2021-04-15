@@ -68,7 +68,9 @@ def load_data(path_data):
     df = pd.DataFrame()
 
     for file in glob.glob("*.h5"):
-        df = df.append(pd.DataFrame(np.array(h5py.File(file)['vectors'])))
+        features = h5py.File(file, mode='r')['vectors']
+        np_array = np.array(features)
+        df = df.append(pd.DataFrame(np_array), ignore_index=True)
 
     csvs = glob.glob("*.csv")
 

@@ -138,8 +138,6 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     inlier_parray = result.loc[lambda df: df.y == 0.0]["p"].values
     outlier_parray = result.loc[lambda df: df.y == 1.0]["p"].values
     sum = 0.0
-    o_size = len(outlier_parray)
-    i_size = len(inlier_parray)
     start_index = 0
     for i in inlier_parray:
         nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
@@ -149,6 +147,15 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     AUC = (sum / (len(inlier_parray) * len(outlier_parray)))
     print(to_print + "  " +"{:.4f}".format(AUC))
     train_history[field].append(AUC)
+
+    '''predicts = discriminator.predict_classes(data_x)
+    assert(len(data_y) == len(data_x))
+    diff = data_y - predicts
+    acc = np.count_nonzero(diff == 0) / len(data_y)
+    print(to_print + "  " + "{:.4f}".format(acc))'''
+    train_history[field].append(acc)
+
+
 
 if __name__ == '__main__':
     train = True

@@ -31,7 +31,7 @@ def parse_args():
                         help='Decay.')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum.')
-    parser.add_argument('--all_data', type=bool, default=True,
+    parser.add_argument('--all_data', type=str2bool, default=True,
                         help='Take all files in path')
 
     args = parser.parse_args()

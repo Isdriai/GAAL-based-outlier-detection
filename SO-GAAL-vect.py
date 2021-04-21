@@ -34,15 +34,16 @@ def parse_args():
     parser.add_argument('--all_data', type=bool, default=True,
                         help='Take all files in path')
 
-    
+    args = parser.parse_args()
+
     dict_args = {
-        'path'        : parser.path,
-        'stop_epochs' : parser.stop_epochs,
-        'lr_d'        : parser.lr_d,
-        'lr_g'        : parser.lr_g,
-        'decay'       : parser.decay,
-        'momentum'    : parser.momentum,
-        'all_data'    : parser.all_data
+        'path'        : args.path,
+        'stop_epochs' : args.stop_epochs,
+        'lr_d'        : args.lr_d,
+        'lr_g'        : args.lr_g,
+        'decay'       : args.decay,
+        'momentum'    : args.momentum,
+        'all_data'    : args.all_data
     }
     return dict_args
 

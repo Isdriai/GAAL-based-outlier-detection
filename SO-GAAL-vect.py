@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum.')
     parser.add_argument('--all_data', type=bool, default=True,
-                        help=='Take all files in path')
+                        help='Take all files in path')
 
     
     dict_args = {

@@ -160,16 +160,16 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
         start_index = st_i
         sum += nbr_inf
         sum += (nbr_eq * 0.5)
-    AUC = (sum / (len(inlier_parray) * len(outlier_parray)))
-    print(to_print + "  " +"{:.4f}".format(AUC))
-    train_history[field].append(AUC)
+    acc = (sum / (len(inlier_parray) * len(outlier_parray)))
+    print(to_print + "  " +"{:.4f}".format(acc))
+    train_history[field].append(acc)
 
     '''predicts = discriminator.predict_classes(data_x)
     assert(len(data_y) == len(data_x))
     diff = data_y - predicts
     acc = np.count_nonzero(diff == 0) / len(data_y)
-    print(to_print + "  " + "{:.4f}".format(acc))'''
-    train_history[field].append(acc)
+    print(to_print + "  " + "{:.4f}".format(acc))
+    train_history[field].append(acc)'''
 
 
 

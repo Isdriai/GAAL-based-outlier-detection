@@ -31,8 +31,9 @@ def parse_args():
                         help='Decay.')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum.')
+    parser.add_argument('--all_data', type=bool, default=True,
+                        help=='Take all files in path')
 
-    args = parser.parse_args()
     
     dict_args = {
         'path'        : args.path,
@@ -63,20 +64,28 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data(path_data):
+def load_data(path_data, all):
     os.chdir(path_data)
+
     df = pd.DataFrame()
 
-    for file in glob.glob("*.h5"):
-        features = h5py.File(file, mode='r')['vectors']
-        np_array = np.array(features)
-        df = df.append(pd.DataFrame(np_array), ignore_index=True)
+    labels = None
+    if all:
+        for file in glob.glob("*.h5"):
+            features = h5py.File(file, mode='r')['vectors']
+            np_array = np.array(features)
+            df = df.append(pd.DataFrame(np_array), ignore_index=True)
 
-    csvs = glob.glob("*.csv")
+        csvs = glob.glob("*.csv")
 
-    assert(len(csvs) == 1)
+        assert(len(csvs) == 1)
 
-    labels = pd.read_table(csvs[0], sep=',')["Label"]
+        labels = pd.read_table(csvs[0], sep=',')["Label"]
+    else:
+        df = pd.read_table('{path}'.format(path = args["path"]), sep=',', header=None)
+        df = data.sample(frac=1).reset_index(drop=True)
+        df.pop(0)
+        labels = data.pop(1)
 
     return df.values, labels.values
 
@@ -135,8 +144,8 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     result = result.sort_values('p', ascending=True)
 
     # Calculate the AUC
-    inlier_parray = result.loc[lambda df: df.y == 0.0]["p"].values
-    outlier_parray = result.loc[lambda df: df.y == 1.0]["p"].values
+    inlier_parray = result.loc[lambda df: df.y == 0.0 or df.y == "nor"]["p"].values
+    outlier_parray = result.loc[lambda df: df.y == 1.0 or df.y == "out"]["p"].values
     sum = 0.0
     start_index = 0
     for i in inlier_parray:
@@ -160,7 +169,7 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
-    data_x, data_y = load_data(args["path"]) # faut mettre le dossier, apres load_data se charge du reste
+    data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
     rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
     data_x_test = data_x[rows]
     data_x = data_x[~rows]

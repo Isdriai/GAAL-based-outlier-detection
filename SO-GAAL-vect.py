@@ -31,7 +31,7 @@ def parse_args():
                         help='Decay.')
     parser.add_argument('--momentum', type=float, default=0.9,
                         help='Momentum.')
-    parser.add_argument('--all_data', type=str2bool, default=True,
+    parser.add_argument('--all_data', type=bool, default=True,
                         help='Take all files in path')
 
     args = parser.parse_args()
@@ -66,9 +66,9 @@ def create_discriminator():
     return Model(data, fake)
 
 # Load data
-def load_data(path_data, all):
+def load_data(path_data, all_data):
 
-    if all:
+    if all_data:
         os.chdir(path_data)
     else:
         os.chdir("/".join(path_data.split("/")[:-1]))
@@ -76,7 +76,7 @@ def load_data(path_data, all):
     df = pd.DataFrame()
 
     labels = None
-    if all:
+    if all_data:
         for file in glob.glob("*.h5"):
             features = h5py.File(file, mode='r')['vectors']
             np_array = np.array(features)

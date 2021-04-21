@@ -89,7 +89,7 @@ def load_data(path_data, all_data):
 
         labels = pd.read_table(csvs[0], sep=',')["Label"]
     else:
-        df = pd.read_table('{path}'.format(path = args["path"]), sep=',', header=None)
+        df = pd.read_table('{path}'.format(path = path_data.split("/")[-1]), sep=',', header=None)
         df = data.sample(frac=1).reset_index(drop=True)
         df.pop(0)
         labels = data.pop(1)

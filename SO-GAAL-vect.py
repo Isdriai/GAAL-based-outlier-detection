@@ -41,7 +41,8 @@ def parse_args():
         'lr_d'        : args.lr_d,
         'lr_g'        : args.lr_g,
         'decay'       : args.decay,
-        'momentum'    : args.momentum
+        'momentum'    : args.momentum,
+        'all_data'    : args.all_data
     }
     return dict_args
 

@@ -67,7 +67,11 @@ def create_discriminator():
 
 # Load data
 def load_data(path_data, all):
-    os.chdir(path_data)
+
+    if all:
+        os.chdir(path_data)
+    else:
+        os.chdir("/".join(path_data.split("/")[:-1]))
 
     df = pd.DataFrame()
 

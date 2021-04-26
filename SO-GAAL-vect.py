@@ -90,10 +90,10 @@ def load_data(path_data, all_data):
         labels = pd.read_table(csvs[0], sep=',')["Label"]
     else:
         df = pd.read_table('{path}'.format(path = path_data.split("/")[-1]), sep=',', header=None)
-        df = df.sample(frac=1).reset_index(drop=True)
         df.pop(0)
         labels = df.pop(1)
 
+    df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
 
 # Plot loss history

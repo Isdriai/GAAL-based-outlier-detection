@@ -60,7 +60,14 @@ def create_generator(latent_size):
 # Discriminator
 def create_discriminator():
     dis = Sequential()
-    dis.add(Dense(math.ceil(math.sqrt(data_size)), input_dim=latent_size, activation='relu', kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
+    dis.add(Dense(math.ceil(math.sqrt(data_size)), input_dim=latent_size, activation='relu', 
+            kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', 
+            distribution='normal', 
+            seed=None)))
+    dis.add(Dense(math.sqrt(math.sqrt(data_size))), activation='relu', 
+            kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', 
+            distribution='normal', 
+            seed=None)))
     dis.add(Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
     data = Input(shape=(latent_size,))
     fake = dis(data)
@@ -119,7 +126,7 @@ def plot(train_history, name, args):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res/res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
+    name = "res/discri_double_dose_res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
 
     print("on sav dans le fichier: " + name)
     plt.savefig(name)
@@ -163,14 +170,6 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     acc = (sum / (len(inlier_parray) * len(outlier_parray)))
     print(to_print + "  " +"{:.4f}".format(acc))
     train_history[field].append(acc)
-
-    '''predicts = discriminator.predict_classes(data_x)
-    assert(len(data_y) == len(data_x))
-    diff = data_y - predicts
-    acc = np.count_nonzero(diff == 0) / len(data_y)
-    print(to_print + "  " + "{:.4f}".format(acc))
-    train_history[field].append(acc)'''
-
 
 
 if __name__ == '__main__':

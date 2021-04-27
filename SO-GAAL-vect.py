@@ -103,7 +103,7 @@ def load_data(path_data, all_data):
 
     
     scaler = preprocessing.MinMaxScaler()
-    df = scaler.fit_transform(df)
+    df = pd.DataFrame(scaler.fit_transform(df))
 
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values

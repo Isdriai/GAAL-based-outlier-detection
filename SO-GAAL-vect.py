@@ -65,7 +65,7 @@ def create_discriminator():
             kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', 
             distribution='normal', 
             seed=None)))
-    dis.add(Dense(math.sqrt(math.sqrt(data_size))), activation='relu', 
+    dis.add(Dense(math.sqrt(math.sqrt(data_size)), activation='relu', 
             kernel_initializer= keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', 
             distribution='normal', 
             seed=None)))

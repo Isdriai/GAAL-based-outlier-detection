@@ -15,6 +15,7 @@ from datetime import datetime
 import glob, os
 import h5py
 import pdb
+from sklearn import preprocessing
 
 
 def parse_args():
@@ -100,6 +101,10 @@ def load_data(path_data, all_data):
         df.pop(0)
         labels = df.pop(1)
 
+    
+    scaler = preprocessing.MinMaxScaler()
+    df = scaler.fit_transform(df)
+
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
 
@@ -126,7 +131,7 @@ def plot(train_history, name, args):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res/discri_double_dose_res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
+    name = "res/discri_double_dose_scale_res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
 
     print("on sav dans le fichier: " + name)
     plt.savefig(name)

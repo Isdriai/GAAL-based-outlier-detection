@@ -111,7 +111,7 @@ def load_data(path_data, all_data):
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
 
-def load_data(path_data):
+def load_data_splitted(path_data):
     path_data_train, path_data_test = path_data 
     df_train = pd.read_csv(path_data_train)
     df_test = pd.read_csv(path_data_test)

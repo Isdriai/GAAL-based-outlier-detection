@@ -34,17 +34,20 @@ def parse_args():
                         help='Momentum.')
     parser.add_argument('--all_data', default="",
                         help='Take all files in path')
+    parser.add_argument('--data_splitted', default="",
+                        help='Data are already splitted')
 
     args = parser.parse_args()
 
     dict_args = {
-        'path'        : args.path,
-        'stop_epochs' : args.stop_epochs,
-        'lr_d'        : args.lr_d,
-        'lr_g'        : args.lr_g,
-        'decay'       : args.decay,
-        'momentum'    : args.momentum,
-        'all_data'    : bool(args.all_data)
+        'path'         : args.path,
+        'stop_epochs'  : args.stop_epochs,
+        'lr_d'         : args.lr_d,
+        'lr_g'         : args.lr_g,
+        'decay'        : args.decay,
+        'momentum'     : args.momentum,
+        'all_data'     : bool(args.all_data),
+        'data_splitted': bool(args.data_splitted)
     }
 
     return dict_args
@@ -107,6 +110,15 @@ def load_data(path_data, all_data):
 
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
+
+def load_data((path_data_train, path_data_test)):
+    df_train = pd.read_csv(path_data_train)
+    df_test = pd.read_csv(path_data_test)
+
+    label_train = pd.read_csv(path_data_train.replace(".csv", "") + "label.csv")
+    label_test = pd.read_csv(path_data_test.replace(".csv", "") + "label.csv")
+
+    return df_train.values, label_train.values, df_test.values, label_test.values
 
 # Plot loss history
 # Plot loss history
@@ -180,12 +192,17 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
 if __name__ == '__main__':
     train = True
     args = parse_args()
-    data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
-    rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
-    data_x_test = data_x[rows]
-    data_x = data_x[~rows]
-    data_y_test = data_y[rows]
-    data_y = data_y[~rows]
+    if not args["data_splitted"]:
+        data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
+        rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
+        data_x_test = data_x[rows]
+        data_x = data_x[~rows]
+        data_y_test = data_y[rows]
+        data_y = data_y[~rows]
+
+        pdb.set_trace()
+    else:
+        data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["data_splitted"])
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

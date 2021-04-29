@@ -111,7 +111,8 @@ def load_data(path_data, all_data):
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
 
-def load_data((path_data_train, path_data_test)):
+def load_data(path_data):
+    path_data_train, path_data_test = path_data 
     df_train = pd.read_csv(path_data_train)
     df_test = pd.read_csv(path_data_test)
 
@@ -202,7 +203,7 @@ if __name__ == '__main__':
 
         pdb.set_trace()
     else:
-        data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["data_splitted"])
+        data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["data_splitted"].split("%"))
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

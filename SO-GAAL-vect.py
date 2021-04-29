@@ -201,7 +201,6 @@ if __name__ == '__main__':
         data_y_test = data_y[rows]
         data_y = data_y[~rows]
 
-        pdb.set_trace()
     else:
         data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["path"].split("%"))
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))

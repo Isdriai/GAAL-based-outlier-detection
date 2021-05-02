@@ -16,6 +16,7 @@ import glob, os
 import h5py
 import pdb
 from sklearn import preprocessing
+from sklearn.metrics import confusion_matrix
 
 
 def parse_args():
@@ -123,7 +124,7 @@ def load_data_splitted(path_data):
 
 # Plot loss history
 # Plot loss history
-def plot(train_history, name, args):
+def plot(train_history, title, field, args, label):
     #dy = train_history['discriminator_loss']
     #gy = train_history['generator_loss']
     #x = np.linspace(1, len(aucy), len(aucy))
@@ -132,19 +133,19 @@ def plot(train_history, name, args):
     
     plt.style.use("ggplot")
     fig = plt.figure()
-    plt.plot(np.arange(0, len(train_history["auc"])), train_history["auc"], color="red", label="train acc")
-    if "auc_test" in train_history:
-      plt.plot(np.arange(0, len(train_history["auc_test"])), train_history["auc_test"], color='blue', label="test acc")
-    plt.title("ACC")
+    plt.plot(np.arange(0, len(train_history[field])), train_history[field], color="red", label=label)
+    if field + "_test" in train_history:
+      plt.plot(np.arange(0, len(train_history[field + "_test"])), train_history[field + "_test"], color='blue', label=field + " test")
+    plt.title(title)
     plt.xlabel("Epoch #")
-    plt.ylabel("Acc")
+    plt.ylabel(title)
     plt.legend(loc="upper right")
     ax = fig.get_axes()[0]
     #plt.setp(ax.get_yticklabels(), visible=False)
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res/discri_double_dose_scale_res_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
+    name = "res/vect_res_{}_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(field, args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
 
     print("on sav dans le fichier: " + name)
     plt.savefig(name)
@@ -274,9 +275,34 @@ if __name__ == '__main__':
 
             calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
 
+            ynew_train = discriminator.predict_classes(data_x) # predict_proba(Xnew)
+            ynew_test = discriminator.predict_classes(data_x_test)
+
+             #y_prob = model.predict(x) 
+            # y_classes = y_prob.argmax(axis=-1)
+
+            tn_train, fp_train, fn_train, tp_train = confusion_matrix(data_y, ynew_train).ravel()
+            tn_test, fp_test, fn_test, tp_test = confusion_matrix(data_y_test, ynew_test).ravel()
+
+            train_history['recall'].append(tp_train/ (tp_train + fp_train))
+            train_history['recall_test'].append(tp_test/ (tp_test + fp_test))
+
+            train_history['precision'].append(tp_train/ (tp_train + tn_train))
+            train_history['precision_test'].append(tp_test/ (tp_test + tn_test))    
+
+            train_history['new_acc'].append((ynew_train == data_y).sum() / len(data_y))
+            train_history['new_acc_test'].append((ynew_test == data_y_test).sum() / len(data_y_test))
+
+
+
 
         print(train_history['auc'])
         print(train_history['auc_test'])
         
         print("maintenant on affiche")
-        plot(train_history, 'AUC', args)
+        plot(train_history, 'AUC', 'auc', args, 'train acc')
+        plot(train_history, 'discriminator_loss', 'discriminator_loss', args, 'discri loss')
+        plot(train_history, 'generator_loss', 'generator_loss', args, 'gene loss')
+        plot(train_history, 'recall', 'recall', args, 'recall')
+        plot(train_history, 'precision', 'precision', args, 'precision')
+        plot(train_history, 'new_acc', 'new_acc', args, 'new_acc')

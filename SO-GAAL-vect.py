@@ -1,13 +1,13 @@
-from keras.layers import Input, Dense
-from keras.models import Sequential, Model
-from keras.optimizers import SGD
+from tensorflow import keras
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.optimizers import SGD
 import numpy as np
 import pandas as pd
 from collections import defaultdict
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import keras
 import math
 import argparse
 from datetime import date
@@ -275,7 +275,7 @@ if __name__ == '__main__':
 
             calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
 
-            ynew_train = discriminator.predict_classes(data_x) # predict_proba(Xnew)
+            '''ynew_train = discriminator.predict_classes(data_x) # predict_proba(Xnew)
             ynew_test = discriminator.predict_classes(data_x_test)
 
              #y_prob = model.predict(x) 
@@ -291,7 +291,7 @@ if __name__ == '__main__':
             train_history['precision_test'].append(tp_test/ (tp_test + tn_test))    
 
             train_history['new_acc'].append((ynew_train == data_y).sum() / len(data_y))
-            train_history['new_acc_test'].append((ynew_test == data_y_test).sum() / len(data_y_test))
+            train_history['new_acc_test'].append((ynew_test == data_y_test).sum() / len(data_y_test))'''
 
 
 

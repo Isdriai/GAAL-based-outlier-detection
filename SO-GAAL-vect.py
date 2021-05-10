@@ -16,7 +16,7 @@ import glob, os
 import h5py
 import pdb
 from sklearn import preprocessing
-from sklearn.metrics import confusion_matrix
+from sklearn import metrics 
 
 
 def parse_args():
@@ -25,10 +25,8 @@ def parse_args():
                         help='Input data path.')
     parser.add_argument('--stop_epochs', type=int, default=20,
                         help='Stop training generator after stop_epochs.')
-    parser.add_argument('--lr_d', type=float, default=0.01,
-                        help='Learning rate of discriminator.')
-    parser.add_argument('--lr_g', type=float, default=0.0001,
-                        help='Learning rate of generator.')
+    parser.add_argument('--lr', type=float, default=0.01,
+                        help='Learning rate of model.')
     parser.add_argument('--decay', type=float, default=1e-6,
                         help='Decay.')
     parser.add_argument('--momentum', type=float, default=0.9,
@@ -43,8 +41,7 @@ def parse_args():
     dict_args = {
         'path'         : args.path,
         'stop_epochs'  : args.stop_epochs,
-        'lr_d'         : args.lr_d,
-        'lr_g'         : args.lr_g,
+        'lr'           : args.lr,
         'decay'        : args.decay,
         'momentum'     : args.momentum,
         'all_data'     : bool(args.all_data),
@@ -58,9 +55,7 @@ def create_generator(latent_size):
     gen = Sequential()
     gen.add(Dense(latent_size, input_dim=latent_size, activation='relu', kernel_initializer=keras.initializers.Identity(gain=1.0)))
     gen.add(Dense(latent_size, activation='relu', kernel_initializer=keras.initializers.Identity(gain=1.0)))
-    latent = Input(shape=(latent_size,))
-    fake_data = gen(latent)
-    return Model(latent, fake_data)
+    return gen
 
 # Discriminator
 def create_discriminator():
@@ -74,9 +69,8 @@ def create_discriminator():
             distribution='normal', 
             seed=None)))
     dis.add(Dense(1, activation='sigmoid', kernel_initializer=keras.initializers.VarianceScaling(scale=1.0, mode='fan_in', distribution='normal', seed=None)))
-    data = Input(shape=(latent_size,))
-    fake = dis(data)
-    return Model(data, fake)
+    #dis.compile(optimizer=SGD(learning_rate=args["lr"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
+    return dis
 
 # Load data
 def load_data(path_data, all_data):
@@ -123,7 +117,6 @@ def load_data_splitted(path_data):
     return df_train.values, label_train.values, df_test.values, label_test.values
 
 # Plot loss history
-# Plot loss history
 def plot(train_history, title, field, args, label):
     #dy = train_history['discriminator_loss']
     #gy = train_history['generator_loss']
@@ -145,50 +138,25 @@ def plot(train_history, title, field, args, label):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res/vect_res_{}_db_{}_LRs_{}_{}_momentum_{}_decay_{}_{}_{}.png".format(field, args["path"].replace("/", "-"), args["lr_d"], args["lr_g"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
+    name = "res/vect_res_{}_db_{}_LR_{}_momentum_{}_decay_{}_{}_{}.png".format(field, args["path"].replace("/", "-"), args["lr"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
 
     print("on sav dans le fichier: " + name)
     plt.savefig(name)
 
-def count_occ_eq_and_inf(value, tab, start_index):
-    nbr_occ = 0
-    index_first_occ = None
-    for i in range(start_index, len(tab)):
-        if tab[i] == value:
-            if index_first_occ == None:
-                index_first_occ = i
-            nbr_occ += 1
-        elif tab[i] > value:
-            index_first_occ = index_first_occ if index_first_occ != None else i
-            return index_first_occ, nbr_occ, index_first_occ
-    # si on croise pas de > donc quand tout le tab est < et/ou ==
-    if index_first_occ == None:
-        return len(tab), 0, len(tab)
-    else:
-        return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
-def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
-    # Detection result
-    p_value = discriminator.predict(data_x)
+def calc_sk_metrics(x, y, discri, to_print):
+    p_value = discriminator.predict(x)
     p_value = pd.DataFrame(p_value)
-    data_y = pd.DataFrame(data_y)
-    result = np.concatenate((p_value,data_y), axis=1)
-    result = pd.DataFrame(result, columns=['p', 'y'])
-    result = result.sort_values('p', ascending=True)
 
-    # Calculate the AUC
-    inlier_parray = result.loc[lambda df: (df.y == 0.0) | (df.y == "nor")]["p"].values
-    outlier_parray = result.loc[lambda df: (df.y == 1.0) | (df.y == "out")]["p"].values
-    sum = 0.0
-    start_index = 0
-    for i in inlier_parray:
-        nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-        start_index = st_i
-        sum += nbr_inf
-        sum += (nbr_eq * 0.5)
-    acc = (sum / (len(inlier_parray) * len(outlier_parray)))
-    print(to_print + "  " +"{:.4f}".format(acc))
-    train_history[field].append(acc)
+    result = np.concatenate([p_value, pd.DataFrame(data_y)], axis=1)
+    result = pd.DataFrame(result, columns=['p', 'y']).sort_values('p', ascending=True)
+
+    fpr, tpr, _ = metrics.roc_curve(result['y'].values, result['p'].values)
+    AUC = metrics.auc(fpr, tpr)
+
+    print(to_print + " AUC  " +"{:.4f}".format(AUC))
+
+    return AUC
 
 
 if __name__ == '__main__':
@@ -214,7 +182,7 @@ if __name__ == '__main__':
 
         # Create discriminator
         discriminator = create_discriminator()
-        discriminator.compile(optimizer=SGD(lr=args["lr_d"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
+        discriminator.compile(optimizer=SGD(learning_rate=args["lr"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
 
         # Create combine model
         generator = create_generator(latent_size)
@@ -222,8 +190,10 @@ if __name__ == '__main__':
         fake = generator(latent)
         discriminator.trainable = False
         fake = discriminator(fake)
-        combine_model = Model(latent, fake)
-        combine_model.compile(optimizer=SGD(lr=args["lr_g"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
+        combine_model = Sequential()
+        combine_model.add(generator)
+        combine_model.add(discriminator)
+        combine_model.compile(optimizer=SGD(learning_rate=args["lr"], decay=args["decay"], momentum=args["momentum"]), loss='binary_crossentropy')
 
         # Start iteration
         for epoch in range(epochs):
@@ -267,42 +237,13 @@ if __name__ == '__main__':
                 stop = 1
 
 
-            # Calc auc train
+            acc = calc_sk_metrics(data_x, data_y, discriminator, 'train')
+            train_history['auc'].append(acc) 
 
-            calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y)
-
-            # calc auc test Test
-
-            calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
-
-            '''ynew_train = discriminator.predict_classes(data_x) # predict_proba(Xnew)
-            ynew_test = discriminator.predict_classes(data_x_test)
-
-             #y_prob = model.predict(x) 
-            # y_classes = y_prob.argmax(axis=-1)
-
-            tn_train, fp_train, fn_train, tp_train = confusion_matrix(data_y, ynew_train).ravel()
-            tn_test, fp_test, fn_test, tp_test = confusion_matrix(data_y_test, ynew_test).ravel()
-
-            train_history['recall'].append(tp_train/ (tp_train + fp_train))
-            train_history['recall_test'].append(tp_test/ (tp_test + fp_test))
-
-            train_history['precision'].append(tp_train/ (tp_train + tn_train))
-            train_history['precision_test'].append(tp_test/ (tp_test + tn_test))    
-
-            train_history['new_acc'].append((ynew_train == data_y).sum() / len(data_y))
-            train_history['new_acc_test'].append((ynew_test == data_y_test).sum() / len(data_y_test))'''
-
-
-
-
-        print(train_history['auc'])
-        print(train_history['auc_test'])
+            acc_test = calc_sk_metrics(data_x_test, data_y_test, discriminator, 'test')
+            train_history['auc_test'].append(acc_test)
         
         print("maintenant on affiche")
-        plot(train_history, 'AUC', 'auc', args, 'train acc')
+        plot(train_history, 'ROC AUC', 'auc', args, 'train acc')
         plot(train_history, 'discriminator_loss', 'discriminator_loss', args, 'discri loss')
         plot(train_history, 'generator_loss', 'generator_loss', args, 'gene loss')
-        plot(train_history, 'recall', 'recall', args, 'recall')
-        plot(train_history, 'precision', 'precision', args, 'precision')
-        plot(train_history, 'new_acc', 'new_acc', args, 'new_acc')

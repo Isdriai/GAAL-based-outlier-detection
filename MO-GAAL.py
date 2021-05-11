@@ -156,7 +156,7 @@ def count_occ_eq_and_inf(value, tab, start_index):
 
 def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
     # Detection result
-    p_value = discriminator.predict(data_x)
+    '''p_value = discriminator.predict(data_x)
     p_value = pd.DataFrame(p_value)
     data_y = pd.DataFrame(data_y)
     result = np.concatenate((p_value,data_y), axis=1)
@@ -173,9 +173,20 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
         start_index = st_i
         sum += nbr_inf
         sum += (nbr_eq * 0.5)
-    acc = (sum / (len(inlier_parray) * len(outlier_parray)))
-    print(to_print + "  " +"{:.4f}".format(acc))
-    train_history[field].append(acc)
+    acc = (sum / (len(inlier_parray) * len(outlier_parray)))'''
+
+    pred = discriminator.predict(data_x)
+    _, _, thresholds = metrics.roc_curve(data_y, pred)
+
+    acc_max = 0
+    for thres in thresholds:
+        y_pred = np.where(pred < thres, 1, 0)
+        acc_tmp = metrics.accuracy_score(data_y, y_pred)
+        if acc_tmp > acc_max:
+            acc_max = acc_tmp
+    
+    print(to_print + "  " +"{:.4f}".format(acc_max))
+    train_history[field].append(acc_max)
 
 if __name__ == '__main__':
     train = True

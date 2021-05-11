@@ -38,6 +38,9 @@ def parse_args():
     parser.add_argument('--k', default=1,
                         help='number of sub generators')
 
+    parser.add_argument('--auc_other', default="",
+                        help='calc other auc')
+
     args = parser.parse_args()
 
     dict_args = {
@@ -48,7 +51,8 @@ def parse_args():
         'decay'        : args.decay,
         'momentum'     : args.momentum,
         'all_data'     : bool(args.all_data),
-        'data_splitted': bool(args.data_splitted)
+        'data_splitted': bool(args.data_splitted),
+        'auc_other'    : bool(args.auc_other)
     }
 
     return dict_args
@@ -106,11 +110,11 @@ def load_data():
 
 def load_data_splitted(path_data):
     path_data_train, path_data_test = path_data 
-    df_train = pd.read_csv(path_data_train)
-    df_test = pd.read_csv(path_data_test)
+    df_train = pd.read_csv(path_data_train, header=None)
+    df_test = pd.read_csv(path_data_test, header=None)
 
-    label_train = pd.read_csv(path_data_train.replace(".csv", "") + "_label.csv")
-    label_test = pd.read_csv(path_data_test.replace(".csv", "") + "_label.csv")
+    label_train = pd.read_csv(path_data_train.replace(".csv", "") + "_label.csv", header=None)
+    label_test = pd.read_csv(path_data_test.replace(".csv", "") + "_label.csv", header=None)
 
     return df_train.values, label_train.values, df_test.values, label_test.values
 
@@ -154,39 +158,42 @@ def count_occ_eq_and_inf(value, tab, start_index):
     else:
         return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
-def calc_auc(train_history, field, to_print, discriminator, data_x, data_y):
-    # Detection result
-    '''p_value = discriminator.predict(data_x)
-    p_value = pd.DataFrame(p_value)
-    data_y = pd.DataFrame(data_y)
-    result = np.concatenate((p_value,data_y), axis=1)
-    result = pd.DataFrame(result, columns=['p', 'y'])
-    result = result.sort_values('p', ascending=True)
+def calc_auc(train_history, field, to_print, discriminator, data_x, data_y, other):
+    acc = 0
+    if not other:
+        # Detection result
+        p_value = discriminator.predict(data_x)
+        p_value = pd.DataFrame(p_value)
+        data_y = pd.DataFrame(data_y)
+        result = np.concatenate((p_value,data_y), axis=1)
+        result = pd.DataFrame(result, columns=['p', 'y'])
+        result = result.sort_values('p', ascending=True)
 
-    # Calculate the AUC
-    inlier_parray = result.loc[lambda df: (df.y == 0.0) | (df.y == "nor")]["p"].values
-    outlier_parray = result.loc[lambda df: (df.y == 1.0) | (df.y == "out")]["p"].values
-    sum = 0.0
-    start_index = 0
-    for i in inlier_parray:
-        nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
-        start_index = st_i
-        sum += nbr_inf
-        sum += (nbr_eq * 0.5)
-    acc = (sum / (len(inlier_parray) * len(outlier_parray)))'''
+        # Calculate the AUC
+        inlier_parray = result.loc[lambda df: (df.y == 0.0) | (df.y == "nor")]["p"].values
+        outlier_parray = result.loc[lambda df: (df.y == 1.0) | (df.y == "out")]["p"].values
+        sum = 0.0
+        start_index = 0
+        for i in inlier_parray:
+            nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+            start_index = st_i
+            sum += nbr_inf
+            sum += (nbr_eq * 0.5)
+        acc = (sum / (len(inlier_parray) * len(outlier_parray)))
 
-    pred = discriminator.predict(data_x)
-    _, _, thresholds = metrics.roc_curve(data_y, pred)
+    else:
+        pred = discriminator.predict(data_x)
+        _, _, thresholds = metrics.roc_curve(data_y, pred)
 
-    acc_max = 0
-    for thres in thresholds:
-        y_pred = np.where(pred < thres, 1, 0)
-        acc_tmp = metrics.accuracy_score(data_y, y_pred)
-        if acc_tmp > acc_max:
-            acc_max = acc_tmp
+        
+        for thres in thresholds:
+            y_pred = np.where(pred < thres, 1, 0)
+            acc_tmp = metrics.accuracy_score(data_y, y_pred)
+            if acc_tmp > acc:
+                acc = acc_tmp
     
-    print(to_print + "  " +"{:.4f}".format(acc_max))
-    train_history[field].append(acc_max)
+    print(to_print + "  " +"{:.4f}".format(acc))
+    train_history[field].append(acc)
 
 if __name__ == '__main__':
     train = True
@@ -301,11 +308,11 @@ if __name__ == '__main__':
 
             # Calc auc train
 
-            calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y)
+            calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y, args['auc_other'])
 
             # calc auc test Test
 
-            calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test)
+            calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test, args['auc_other'])
 
         
     print("maintenant on affiche")

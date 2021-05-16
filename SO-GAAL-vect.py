@@ -52,6 +52,7 @@ def parse_args():
         'momentum'     : args.momentum,
         'all_data'     : bool(args.all_data),
         'data_splitted': bool(args.data_splitted),
+        'auc_other'    : bool(args.auc_other),
         'to_shuffle'    : bool(args.to_shuffle)
     }
 

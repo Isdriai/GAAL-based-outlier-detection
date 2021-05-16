@@ -133,6 +133,15 @@ def load_data_splitted(path_data, to_shuffle):
         label_train = df_train.pop(column_name)
         label_test = df_test.pop(column_name)
 
+    print("size data")
+    print("train data")
+    print(df_train.values.shape)
+    print("train label")
+    print(label_train.values.shape)
+    print("test data")
+    print(df_test.values.shape)
+    print("test label")
+    print(label_test.values.shape)
 
     return df_train.values, label_train.values, df_test.values, label_test.values
 
@@ -216,6 +225,8 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y, othe
 if __name__ == '__main__':
     train = True
 
+    print("coucou A")
+
     # initilize arguments
     args = parse_args()
 
@@ -230,37 +241,47 @@ if __name__ == '__main__':
     else:
         data_x, data_y, data_x_test, data_y_test = load_data_splitted(args['path'].split("%"), args['to_shuffle'])
 
+    print("coucou B")
     latent_size = data_x.shape[1]
     data_size = data_x.shape[0]
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
 
+    print("coucou C")
     if train:
         train_history = defaultdict(list)
+        print("coucou D")
         names = locals()
         epochs = args['stop_epochs'] * 3
         stop = 0
         k = args['k']
 
         # Create discriminator
+        print("coucou E")
         discriminator = create_discriminator()
+        print("coucou F")
         discriminator.compile(optimizer=SGD(lr=args['lr'], decay=args['decay'], momentum=args['momentum']), loss='binary_crossentropy')
-
+        print("coucou G")
         # Create k combine models
         for i in range(k):
+            print("coucou L")
             names['sub_generator' + str(i)] = create_generator(latent_size)
+            print("coucou I")
             latent = Input(shape=(latent_size,))
             names['fake' + str(i)] = names['sub_generator' + str(i)](latent)
+            print("coucou J")
             discriminator.trainable = False
             names['fake' + str(i)] = discriminator(names['fake' + str(i)])
             names['combine_model' + str(i)] = Model(latent, names['fake' + str(i)])
+            print("coucou K")
             names['combine_model' + str(i)].compile(optimizer=SGD(lr=args['lr'], decay=args['decay'], momentum=args['momentum']), loss='binary_crossentropy')
 
+        print("coucou H")
         # Start iteration
         for epoch in range(epochs):
             print('Epoch {} of {}'.format(epoch + 1, epochs))
             batch_size = min(500, data_size)
             num_batches = int(data_size / batch_size)
-
+            print("coucou M")
             for index in range(num_batches):
                 print('\nTesting for epoch {} index {}:'.format(epoch + 1, index + 1))
 
@@ -273,18 +294,24 @@ if __name__ == '__main__':
 
                 # Generate potential outliers
                 block = ((1 + k) * k) // 2
+                print("coucou N")
                 for i in range(k):
                     if i != (k-1):
+                        print("coucou P")
                         noise_start = int((((k + (k - i + 1)) * i) / 2) * (noise_size // block))
                         noise_end = int((((k + (k - i)) * (i + 1)) / 2) * (noise_size // block))
                         names['noise' + str(i)] = noise[noise_start : noise_end ]
                         names['generated_data' + str(i)] = names['sub_generator' + str(i)].predict(names['noise' + str(i)], verbose=0)
+                        print("coucou O")
                     else:
+                        print("coucou Q")
                         noise_start = int((((k + (k - i + 1)) * i) / 2) * (noise_size // block))
                         names['noise' + str(i)] = noise[noise_start : noise_size]
+                        print("coucou R")
                         names['generated_data' + str(i)] = names['sub_generator' + str(i)].predict(names['noise' + str(i)], verbose=0)
 
                 # Concatenate real data to generated data
+                print("coucou S")
                 for i in range(k):
                     if i == 0:
                         X = np.concatenate((data_batch, names['generated_data' + str(i)]))
@@ -293,11 +320,14 @@ if __name__ == '__main__':
                 Y = np.array([1] * batch_size + [0] * int(noise_size))
 
                 # Train discriminator
+                print("coucou T")
                 discriminator_loss = discriminator.train_on_batch(X, Y)
+                print("coucou U")
                 train_history['discriminator_loss'].append(discriminator_loss)
 
                 # Get the target value of sub-generator
                 p_value = discriminator.predict(data_x)
+                print("coucou V")
                 p_value = pd.DataFrame(p_value)
                 for i in range(k):
                     names['T' + str(i)] = p_value.quantile(i/k)
@@ -306,12 +336,17 @@ if __name__ == '__main__':
                 # Train generator
                 noise = np.random.uniform(0, 1, (int(noise_size), latent_size))
                 if stop == 0:
+                    print("coucou W")
                     for i in range(k):
+                        print("coucou X")
                         names['sub_generator' + str(i) + '_loss'] = names['combine_model' + str(i)].train_on_batch(noise, names['trick' + str(i)])
+                        print("coucou Y")
                         train_history['sub_generator{}_loss'.format(i)].append(names['sub_generator' + str(i) + '_loss'])
                 else:
                     for i in range(k):
+                        print("coucou Z")
                         names['sub_generator' + str(i) + '_loss'] = names['combine_model' + str(i)].evaluate(noise, names['trick' + str(i)])
+                        print("coucou AA")
                         train_history['sub_generator{}_loss'.format(i)].append(names['sub_generator' + str(i) + '_loss'])
 
                 generator_loss = 0
@@ -324,15 +359,17 @@ if __name__ == '__main__':
                 if epoch +1  > args['stop_epochs']:
                     stop = 1
 
+            print("coucou AB")
             # Calc auc train
 
             calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y, args['auc_other'])
 
             # calc auc test Test
+            print("coucou AC")
 
             calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test, args['auc_other'])
 
-        
+    print("coucou AD")
     print("maintenant on affiche")
     plot(train_history, 'AUC', 'auc', args, 'train acc')
     plot(train_history, 'discriminator_loss', 'discriminator_loss', args, 'discri loss')

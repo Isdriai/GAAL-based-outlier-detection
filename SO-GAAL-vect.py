@@ -141,6 +141,10 @@ def load_data_splitted(path_data, to_shuffle):
     print("test label")
     print(label_test.values.shape)
 
+    assert(df_train.values.shape[0] == label_train.values.shape[0])
+    assert(df_test.values.shape[0] == label_test.values.shape[0])
+    assert(df_train.values.shape[1] == df_test.values.shape[1])
+
     return df_train.values, label_train.values, df_test.values, label_test.values
 
 # Plot loss history
@@ -171,19 +175,59 @@ def plot(train_history, title, field, args, label):
     plt.savefig(name)
 
 
-def calc_sk_metrics(x, y, discri, to_print):
-    p_value = discriminator.predict(x)
-    p_value = pd.DataFrame(p_value)
+def count_occ_eq_and_inf(value, tab, start_index):
+    nbr_occ = 0
+    index_first_occ = None
+    for i in range(start_index, len(tab)):
+        if tab[i] == value:
+            if index_first_occ == None:
+                index_first_occ = i
+            nbr_occ += 1
+        elif tab[i] > value:
+            index_first_occ = index_first_occ if index_first_occ != None else i
+            return index_first_occ, nbr_occ, index_first_occ
+    # si on croise pas de > donc quand tout le tab est < et/ou ==
+    if index_first_occ == None:
+        return len(tab), 0, len(tab)
+    else:
+        return len(tab) - nbr_occ, nbr_occ, len(tab) 
 
-    result = np.concatenate([p_value, pd.DataFrame(data_y)], axis=1)
-    result = pd.DataFrame(result, columns=['p', 'y']).sort_values('p', ascending=True)
+def calc_auc(train_history, field, to_print, discriminator, data_x, data_y, other):
+    acc = 0
+    if not other:
+        # Detection result
+        p_value = discriminator.predict(data_x)
+        p_value = pd.DataFrame(p_value)
+        data_y = pd.DataFrame(data_y)
+        result = np.concatenate((p_value,data_y), axis=1)
+        result = pd.DataFrame(result, columns=['p', 'y'])
+        result = result.sort_values('p', ascending=True)
 
-    fpr, tpr, _ = metrics.roc_curve(result['y'].values, result['p'].values)
-    AUC = metrics.auc(fpr, tpr)
+        # Calculate the AUC
+        inlier_parray = result.loc[lambda df: (df.y == 0.0) | (df.y == "nor")]["p"].values
+        outlier_parray = result.loc[lambda df: (df.y == 1.0) | (df.y == "out")]["p"].values
+        sum = 0.0
+        start_index = 0
+        for i in inlier_parray:
+            nbr_inf, nbr_eq, st_i = count_occ_eq_and_inf(i, outlier_parray, start_index)
+            start_index = st_i
+            sum += nbr_inf
+            sum += (nbr_eq * 0.5)
+        acc = (sum / (len(inlier_parray) * len(outlier_parray)))
 
-    print(to_print + " AUC  " +"{:.4f}".format(AUC))
+    else:
+        pred = discriminator.predict(data_x)
+        _, _, thresholds = metrics.roc_curve(data_y, pred)
 
-    return AUC
+        
+        for thres in thresholds:
+            y_pred = np.where(pred < thres, 1, 0)
+            acc_tmp = metrics.accuracy_score(data_y, y_pred)
+            if acc_tmp > acc:
+                acc = acc_tmp
+    
+    print(to_print + "  " +"{:.4f}".format(acc))
+    train_history[field].append(acc)
 
 
 if __name__ == '__main__':
@@ -263,12 +307,9 @@ if __name__ == '__main__':
             if epoch + 1 > args["stop_epochs"]:
                 stop = 1
 
+            calc_auc(train_history, 'auc', "AUC", discriminator, data_x, data_y, args['auc_other'])
 
-            acc = calc_sk_metrics(data_x, data_y, discriminator, 'train')
-            train_history['auc'].append(acc) 
-
-            acc_test = calc_sk_metrics(data_x_test, data_y_test, discriminator, 'test')
-            train_history['auc_test'].append(acc_test)
+            calc_auc(train_history, 'auc_test', "AUC_test", discriminator, data_x_test, data_y_test, args['auc_other'])
         
         print("maintenant on affiche")
         plot(train_history, 'ROC AUC', 'auc', args, 'train acc')

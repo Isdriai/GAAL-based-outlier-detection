@@ -36,6 +36,9 @@ def parse_args():
     parser.add_argument('--data_splitted', default="",
                         help='Data are already splitted'),
 
+    parser.add_argument('--auc_other', default="",
+                        help='calc other auc')
+
     parser.add_argument('--to_shuffle', default="",
                         help='if data are not shuffled')
 

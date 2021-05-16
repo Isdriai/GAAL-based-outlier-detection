@@ -34,7 +34,10 @@ def parse_args():
     parser.add_argument('--all_data', default="",
                         help='Take all files in path')
     parser.add_argument('--data_splitted', default="",
-                        help='Data are already splitted')
+                        help='Data are already splitted'),
+
+    parser.add_argument('--to_shuffle', default="",
+                        help='if data are not shuffled')
 
     args = parser.parse_args()
 
@@ -45,7 +48,8 @@ def parse_args():
         'decay'        : args.decay,
         'momentum'     : args.momentum,
         'all_data'     : bool(args.all_data),
-        'data_splitted': bool(args.data_splitted)
+        'data_splitted': bool(args.data_splitted),
+        'to_shuffle'    : bool(args.to_shuffle)
     }
 
     return dict_args
@@ -106,13 +110,36 @@ def load_data(path_data, all_data):
     df = df.sample(frac=1).reset_index(drop=True)
     return df.values, labels.values
 
-def load_data_splitted(path_data):
+def load_data_splitted(path_data, to_shuffle):
     path_data_train, path_data_test = path_data 
-    df_train = pd.read_csv(path_data_train)
-    df_test = pd.read_csv(path_data_test)
+    df_train = pd.read_csv(path_data_train, header=None).sample(frac=1).reset_index(drop=True)
+    df_test = pd.read_csv(path_data_test, header=None).sample(frac=1).reset_index(drop=True)
 
-    label_train = pd.read_csv(path_data_train.replace(".csv", "") + "_label.csv")
-    label_test = pd.read_csv(path_data_test.replace(".csv", "") + "_label.csv")
+    label_train = pd.read_csv(path_data_train.replace(".csv", "") + "_label.csv", header=None)
+    label_test = pd.read_csv(path_data_test.replace(".csv", "") + "_label.csv", header=None)
+
+    
+
+    if to_shuffle:
+        column_name = "label"
+        label_train.columns = [column_name]
+        label_test.columns = [column_name]
+
+        df_train = pd.concat([df_train, label_train], axis=1).sample(frac=1).reset_index(drop=True)
+        df_test = pd.concat([df_test, label_test], axis=1).sample(frac=1).reset_index(drop=True)
+
+        label_train = df_train.pop(column_name)
+        label_test = df_test.pop(column_name)
+
+    print("size data")
+    print("train data")
+    print(df_train.values.shape)
+    print("train label")
+    print(label_train.values.shape)
+    print("test data")
+    print(df_test.values.shape)
+    print("test label")
+    print(label_test.values.shape)
 
     return df_train.values, label_train.values, df_test.values, label_test.values
 
@@ -171,7 +198,7 @@ if __name__ == '__main__':
         data_y = data_y[~rows]
 
     else:
-        data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["path"].split("%"))
+        data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["path"].split("%"), args['to_shuffle'])
     print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
     if train:
         latent_size = data_x.shape[1]

@@ -25,6 +25,8 @@ def parse_args():
                         help='Input data path.')
     parser.add_argument('--stop_epochs', type=int, default=20,
                         help='Stop training generator after stop_epochs.')
+    parser.add_argument('--batch_size', type=int, default=500,
+                        help='batch size.')
     parser.add_argument('--lr', type=float, default=0.01,
                         help='Learning rate of model.')
     parser.add_argument('--decay', type=float, default=1e-6,
@@ -53,7 +55,8 @@ def parse_args():
         'all_data'     : bool(args.all_data),
         'data_splitted': bool(args.data_splitted),
         'auc_other'    : bool(args.auc_other),
-        'to_shuffle'    : bool(args.to_shuffle)
+        'to_shuffle'   : bool(args.to_shuffle),
+        'batch_size'   : args.batch_size 
     }
 
     return dict_args
@@ -134,16 +137,6 @@ def load_data_splitted(path_data, to_shuffle):
 
         label_train = df_train.pop(column_name)
         label_test = df_test.pop(column_name)
-
-    print("size data")
-    print("train data")
-    print(df_train.values.shape)
-    print("train label")
-    print(label_train.values.shape)
-    print("test data")
-    print(df_test.values.shape)
-    print("test label")
-    print(label_test.values.shape)
 
     assert(df_train.values.shape[0] == label_train.values.shape[0])
     assert(df_test.values.shape[0] == label_test.values.shape[0])
@@ -273,7 +266,7 @@ if __name__ == '__main__':
         # Start iteration
         for epoch in range(epochs):
             print('Epoch {} of {}'.format(epoch + 1, epochs))
-            batch_size = min(500, data_size)
+            batch_size = min(args['batch_size'], data_size)
             num_batches = int(data_size / batch_size)
 
             for index in range(num_batches):

@@ -166,7 +166,7 @@ def plot(train_history, title, field, args, label):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
 
-    name = "res/vect_res_{}_db_{}_LR_{}_momentum_{}_decay_{}_{}_{}.png".format(field, args["path"].replace("/", "-"), args["lr"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
+    name = "res/vect_res_{}_db_{}_batch_size{}_LR_{}_momentum_{}_decay_{}_{}_{}.png".format(field, args["path"].replace("/", "-"), args["batch_size"], args["lr"], args["momentum"], args["decay"], date.today(), current_time.replace(":", "-"))
 
     print("on sav dans le fichier: " + name)
     plt.savefig(name)

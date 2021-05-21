@@ -44,6 +44,9 @@ def parse_args():
     parser.add_argument('--to_shuffle', default="",
                         help='if data are not shuffled')
 
+    parser.add_argument('--test', default="",
+                        help='test phase'),
+
     args = parser.parse_args()
 
     dict_args = {
@@ -56,7 +59,8 @@ def parse_args():
         'data_splitted': bool(args.data_splitted),
         'auc_other'    : bool(args.auc_other),
         'to_shuffle'   : bool(args.to_shuffle),
-        'batch_size'   : args.batch_size 
+        'batch_size'   : args.batch_size,
+        'test'         : bool(args.test)
     }
 
     return dict_args
@@ -228,8 +232,8 @@ def calc_auc(train_history, field, to_print, discriminator, data_x, data_y, othe
 
 
 if __name__ == '__main__':
-    train = True
     args = parse_args()
+    train = not args['test']
     if not args["data_splitted"]:
         data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
         rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
@@ -312,3 +316,38 @@ if __name__ == '__main__':
         plot(train_history, 'ROC AUC', 'auc', args, 'train acc')
         plot(train_history, 'discriminator_loss', 'discriminator_loss', args, 'discri loss')
         plot(train_history, 'generator_loss', 'generator_loss', args, 'gene loss')
+        discriminator.save("models/model_LR_{}_momentum_{}_decay_{}_date_{}.model".format(args["lr"], args["momentum"], args["decay"], datetime.now()))
+    else:
+        models = os.listdir("models/")
+        last_modifications = [os.path.getmtime("models/" + mod) for mod in models]
+        zip_iterator = zip(last_modifications, models)
+        dictionary = dict(zip_iterator)
+
+
+        last_modifications.sort()
+        last_modifications.reverse()
+       
+        path = dictionary[last_modifications[0]]
+
+        print("loaded model: " + path)
+        discriminator = keras.models.load_model("models/" + path)
+
+        if not args["data_splitted"]:
+            data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
+            rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
+            data_x_test = data_x[rows]
+            data_x = data_x[~rows]
+            data_y_test = data_y[rows]
+            data_y = data_y[~rows]
+
+        else:
+            data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["path"].split("%"), args['to_shuffle'])
+        
+        print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
+
+        test_history = defaultdict(list)
+
+        calc_auc(test_history, 'auc', 'AUC_validation', discriminator, data_x, data_y, args['auc_other'])
+
+        print(test_history['AUC_validation'][0])
+

@@ -17,7 +17,7 @@ import h5py
 import pdb
 from sklearn import preprocessing
 from sklearn import metrics 
-
+from pickle import load
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run SO-GAAL.")
@@ -47,6 +47,9 @@ def parse_args():
     parser.add_argument('--test', default="",
                         help='test phase'),
 
+    parser.add_argument('--scaled', default="",
+                        help='if validation data are scaled'),
+
     args = parser.parse_args()
 
     dict_args = {
@@ -60,7 +63,8 @@ def parse_args():
         'auc_other'    : bool(args.auc_other),
         'to_shuffle'   : bool(args.to_shuffle),
         'batch_size'   : args.batch_size,
-        'test'         : bool(args.test)
+        'test'         : bool(args.test),
+        'scaled'       : bool(args.scaled)
     }
 
     return dict_args
@@ -90,6 +94,7 @@ def create_discriminator():
 # Load data
 def load_data(path_data, all_data):
 
+    current_dir = os.getcwd()
     if all_data:
         os.chdir(path_data)
     else:
@@ -119,6 +124,7 @@ def load_data(path_data, all_data):
     df = pd.DataFrame(scaler.fit_transform(df))
 
     df = df.sample(frac=1).reset_index(drop=True)
+    os.chdir(current_dir)
     return df.values, labels.values
 
 def load_data_splitted(path_data, to_shuffle):
@@ -318,7 +324,7 @@ if __name__ == '__main__':
         plot(train_history, 'generator_loss', 'generator_loss', args, 'gene loss')
         discriminator.save("models/model_LR_{}_momentum_{}_decay_{}_date_{}.model".format(args["lr"], args["momentum"], args["decay"], datetime.now()))
     else:
-        models = os.listdir("models/")
+        models = os.listdir("models")
         last_modifications = [os.path.getmtime("models/" + mod) for mod in models]
         zip_iterator = zip(last_modifications, models)
         dictionary = dict(zip_iterator)
@@ -332,22 +338,17 @@ if __name__ == '__main__':
         print("loaded model: " + path)
         discriminator = keras.models.load_model("models/" + path)
 
-        if not args["data_splitted"]:
-            data_x, data_y = load_data(args["path"], args["all_data"]) # faut mettre le dossier, apres load_data se charge du reste
-            rows = np.random.choice(data_x.shape[0], size=data_x.shape[0] // 10, replace=True)
-            data_x_test = data_x[rows]
-            data_x = data_x[~rows]
-            data_y_test = data_y[rows]
-            data_y = data_y[~rows]
+        x = pd.read_csv(args['path'], header=None)
+        y = pd.read_csv(args['path'].replace(".csv", "_labels.csv"), header=None)
 
-        else:
-            data_x, data_y, data_x_test, data_y_test = load_data_splitted(args["path"].split("%"), args['to_shuffle'])
+        if not args['scaled']:
+            scaler = load(open("/".join(args['path'].split("/")[:-1]) + '/scaler.pkl', 'rb'))
+            x = pd.DataFrame(scaler.transform(x))
         
-        print("The dimension of the training data :{}*{}".format(data_x.shape[0], data_x.shape[1]))
+        print("The dimension of the validation data :{}*{}".format(x.shape[0], x.shape[1]))
 
         test_history = defaultdict(list)
 
-        calc_auc(test_history, 'auc', 'AUC_validation', discriminator, data_x, data_y, args['auc_other'])
+        calc_auc(test_history, 'auc', 'AUC_validation', discriminator, x, y, args['auc_other'])
 
-        print(test_history['AUC_validation'][0])
-
+        print(test_history['auc'][0])
